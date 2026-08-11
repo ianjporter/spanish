@@ -1,0 +1,320 @@
+<title>Grocery Shopping Vocabulary Deck</title> <style> :root { --primary: #2c3e50; --secondary: #34495e; --accent: #3498db; --light: #ecf0f1; --white: #ffffff; --warning-accent: #e74c3c; } body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light); color: var(--primary); display: flex; flex-direction: column; align-items: center; padding: 2rem; margin: 0; } h1 { text-align: center; color: var(--primary); margin-bottom: 0.5rem; } .controls { margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; } button, select { padding: 0.5rem 1rem; font-size: 1rem; border: none; border-radius: 4px; cursor: pointer; background-color: var(--accent); color: var(--white); transition: background-color 0.3s ease; } button:hover, select:hover { background-color: #2980b9; } .flashcard-container { width: 100%; max-width: 500px; height: 300px; perspective: 1000px; margin-bottom: 2rem; } .flashcard { width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 12px; } .flashcard.is-flipped { transform: rotateY(180deg); } .flashcard-face { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: var(--white); border-radius: 12px; padding: 2rem; box-sizing: border-box; text-align: center; } .flashcard-back { transform: rotateY(180deg); background-color: var(--secondary); color: var(--white); } .word { font-size: 2.2rem; font-weight: bold; margin-bottom: 1rem; word-break: break-word; } .type-badge { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; background: rgba(0,0,0,0.1); padding: 4px 8px; border-radius: 4px; } .flashcard-back .type-badge { background: rgba(255,255,255,0.2); } .navigation { display: flex; gap: 1rem; align-items: center; } .counter { font-size: 1.2rem; font-weight: bold; min-width: 80px; text-align: center; } </style>
+<h1>Master Vocabulary Deck</h1>
+
+<div class="controls">
+    <select id="typeFilter" onchange="filterCards()">
+        <option value="all">All Words (Includes Profanity)</option>
+        <option value="clean">Clean Deck (No Profanity)</option>
+        <option value="profanity-only">Profanity & Slang Only</option>
+        <option value="noun">Nouns Only (Clean)</option>
+        <option value="verb">Verbs Only (Clean)</option>
+        <option value="phrase">Phrases Only (Clean)</option>
+    </select>
+    <button onclick="shuffleCards()">Shuffle Deck</button>
+</div>
+
+<div class="flashcard-container" onclick="flipCard()">
+    <div class="flashcard" id="flashcard">
+        <div class="flashcard-face flashcard-front">
+            <div class="word" id="es-word">Cargando...</div>
+            <div class="type-badge" id="es-type">...</div>
+        </div>
+        <div class="flashcard-face flashcard-back">
+            <div class="word" id="en-word">Loading...</div>
+            <div class="type-badge" id="en-type">...</div>
+        </div>
+    </div>
+</div>
+
+<div class="navigation">
+    <button onclick="prevCard()">&#8592; Previous</button>
+    <div class="counter" id="counter">0 / 0</div>
+    <button onclick="nextCard()">Next &#8594;</button>
+</div>
+
+<script>
+    // Vocabulary Database
+    // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
+    // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+    const allVocab = [
+
+// --- NOUNS: The Supermarket & Shopping (150 Nouns) --- // General Store Terms { es: "el supermercado", en: "supermarket", type: "noun" }, { es: "el mercado", en: "market", type: "noun" }, { es: "la tienda", en: "store / shop", type: "noun" }, { es: "el carrito", en: "shopping cart", type: "noun" }, { es: "la canasta", en: "shopping basket", type: "noun" }, { es: "el pasillo", en: "aisle", type: "noun" }, { es: "el estante", en: "shelf", type: "noun" }, { es: "la caja", en: "cash register / checkout", type: "noun" }, { es: "el cajero", en: "cashier (male)", type: "noun" }, { es: "la cajera", en: "cashier (female)", type: "noun" }, { es: "el recibo", en: "receipt", type: "noun" }, { es: "la factura", en: "invoice / bill", type: "noun" }, { es: "la bolsa", en: "bag", type: "noun" }, { es: "el código de barras", en: "barcode", type: "noun" }, { es: "el precio", en: "price", type: "noun" }, { es: "la oferta", en: "sale / offer", type: "noun" }, { es: "el descuento", en: "discount", type: "noun" }, { es: "la sección", en: "section / department", type: "noun" }, { es: "la báscula", en: "scale (for weighing)", type: "noun" }, { es: "el cliente", en: "customer", type: "noun" }, { es: "la fila", en: "line (queue)", type: "noun" }, { es: "el producto", en: "product", type: "noun" }, { es: "la marca", en: "brand", type: "noun" }, { es: "el envase", en: "container / packaging", type: "noun" }, { es: "el paquete", en: "package", type: "noun" },
+
+// Fruits (Frutas)
+{ es: "la manzana", en: "apple", type: "noun" },
+{ es: "el plátano", en: "banana", type: "noun" },
+{ es: "la naranja", en: "orange", type: "noun" },
+{ es: "la uva", en: "grape", type: "noun" },
+{ es: "la fresa", en: "strawberry", type: "noun" },
+{ es: "el limón", en: "lemon / lime", type: "noun" },
+{ es: "la pera", en: "pear", type: "noun" },
+{ es: "la sandía", en: "watermelon", type: "noun" },
+{ es: "el melón", en: "melon", type: "noun" },
+{ es: "la piña", en: "pineapple", type: "noun" },
+{ es: "el aguacate", en: "avocado", type: "noun" },
+{ es: "el tomate", en: "tomato", type: "noun" },
+{ es: "el mango", en: "mango", type: "noun" },
+{ es: "el durazno", en: "peach", type: "noun" },
+{ es: "la ciruela", en: "plum", type: "noun" },
+{ es: "la cereza", en: "cherry", type: "noun" },
+{ es: "la frambuesa", en: "raspberry", type: "noun" },
+{ es: "el arándano", en: "blueberry", type: "noun" },
+{ es: "la toronja", en: "grapefruit", type: "noun" },
+{ es: "la papaya", en: "papaya", type: "noun" },
+
+// Vegetables (Verduras y Vegetales)
+{ es: "la cebolla", en: "onion", type: "noun" },
+{ es: "el ajo", en: "garlic", type: "noun" },
+{ es: "la papa", en: "potato", type: "noun" },
+{ es: "la zanahoria", en: "carrot", type: "noun" },
+{ es: "la lechuga", en: "lettuce", type: "noun" },
+{ es: "la espinaca", en: "spinach", type: "noun" },
+{ es: "el brócoli", en: "broccoli", type: "noun" },
+{ es: "la coliflor", en: "cauliflower", type: "noun" },
+{ es: "el pimiento", en: "bell pepper", type: "noun" },
+{ es: "el chile", en: "hot pepper / chili", type: "noun" },
+{ es: "el pepino", en: "cucumber", type: "noun" },
+{ es: "el calabacín", en: "zucchini", type: "noun" },
+{ es: "el maíz", en: "corn", type: "noun" },
+{ es: "el apio", en: "celery", type: "noun" },
+{ es: "el champiñón", en: "mushroom", type: "noun" },
+{ es: "la calabaza", en: "pumpkin / squash", type: "noun" },
+{ es: "la berenjena", en: "eggplant", type: "noun" },
+{ es: "el espárrago", en: "asparagus", type: "noun" },
+{ es: "el guisante", en: "pea", type: "noun" },
+{ es: "el frijol verde", en: "green bean", type: "noun" },
+
+// Meats & Seafood (Carnes y Mariscos)
+{ es: "la carne", en: "meat", type: "noun" },
+{ es: "el pollo", en: "chicken", type: "noun" },
+{ es: "la res", en: "beef", type: "noun" },
+{ es: "el cerdo", en: "pork", type: "noun" },
+{ es: "el pescado", en: "fish (caught)", type: "noun" },
+{ es: "el camarón", en: "shrimp", type: "noun" },
+{ es: "el salmón", en: "salmon", type: "noun" },
+{ es: "el atún", en: "tuna", type: "noun" },
+{ es: "el pavo", en: "turkey", type: "noun" },
+{ es: "el jamón", en: "ham", type: "noun" },
+{ es: "la salchicha", en: "sausage / hot dog", type: "noun" },
+{ es: "el chorizo", en: "spicy sausage", type: "noun" },
+{ es: "el tocino", en: "bacon", type: "noun" },
+{ es: "la carne molida", en: "ground beef", type: "noun" },
+{ es: "la chuleta", en: "pork chop", type: "noun" },
+{ es: "el bistec", en: "steak", type: "noun" },
+{ es: "el cordero", en: "lamb", type: "noun" },
+{ es: "el marisco", en: "shellfish / seafood", type: "noun" },
+{ es: "el calamar", en: "squid", type: "noun" },
+{ es: "el pulpo", en: "octopus", type: "noun" },
+
+// Dairy & Eggs (Lácteos y Huevos)
+{ es: "la leche", en: "milk", type: "noun" },
+{ es: "el queso", en: "cheese", type: "noun" },
+{ es: "la mantequilla", en: "butter", type: "noun" },
+{ es: "el yogur", en: "yogurt", type: "noun" },
+{ es: "el huevo", en: "egg", type: "noun" },
+{ es: "la crema", en: "cream", type: "noun" },
+{ es: "la margarina", en: "margarine", type: "noun" },
+{ es: "el helado", en: "ice cream", type: "noun" },
+{ es: "el requesón", en: "cottage cheese / ricotta", type: "noun" },
+{ es: "la leche almendras", en: "almond milk", type: "noun" },
+
+// Bakery & Grains (Panadería y Granos)
+{ es: "el pan", en: "bread", type: "noun" },
+{ es: "el arroz", en: "rice", type: "noun" },
+{ es: "la pasta", en: "pasta", type: "noun" },
+{ es: "la harina", en: "flour", type: "noun" },
+{ es: "la avena", en: "oats / oatmeal", type: "noun" },
+{ es: "el cereal", en: "cereal", type: "noun" },
+{ es: "la galleta", en: "cookie / cracker", type: "noun" },
+{ es: "el pastel", en: "cake", type: "noun" },
+{ es: "la tortilla", en: "tortilla", type: "noun" },
+{ es: "la masa", en: "dough", type: "noun" },
+{ es: "la levadura", en: "yeast", type: "noun" },
+{ es: "el bollo", en: "bun / roll", type: "noun" },
+{ es: "el pan integral", en: "whole wheat bread", type: "noun" },
+{ es: "el centeno", en: "rye", type: "noun" },
+{ es: "el trigo", en: "wheat", type: "noun" },
+
+// Pantry, Condiments & Nuts (Despensa y Condimentos)
+{ es: "la sal", en: "salt", type: "noun" },
+{ es: "la pimienta", en: "pepper (spice)", type: "noun" },
+{ es: "el azúcar", en: "sugar", type: "noun" },
+{ es: "el aceite", en: "oil", type: "noun" },
+{ es: "el vinagre", en: "vinegar", type: "noun" },
+{ es: "la mostaza", en: "mustard", type: "noun" },
+{ es: "el kétchup", en: "ketchup", type: "noun" },
+{ es: "la mayonesa", en: "mayonnaise", type: "noun" },
+{ es: "la salsa", en: "sauce / salsa", type: "noun" },
+{ es: "la miel", en: "honey", type: "noun" },
+{ es: "la mermelada", en: "jam / jelly", type: "noun" },
+{ es: "la sopa", en: "soup", type: "noun" },
+{ es: "el caldo", en: "broth", type: "noun" },
+{ es: "la especia", en: "spice", type: "noun" },
+{ es: "la canela", en: "cinnamon", type: "noun" },
+{ es: "la vainilla", en: "vanilla", type: "noun" },
+{ es: "la nuez", en: "walnut / nut", type: "noun" },
+{ es: "la almendra", en: "almond", type: "noun" },
+{ es: "el maní", en: "peanut", type: "noun" },
+{ es: "el frijol", en: "bean", type: "noun" },
+
+// Beverages (Bebidas)
+{ es: "el agua", en: "water", type: "noun" },
+{ es: "el jugo", en: "juice", type: "noun" },
+{ es: "el café", en: "coffee", type: "noun" },
+{ es: "el té", en: "tea", type: "noun" },
+{ es: "el refresco", en: "soda / soft drink", type: "noun" },
+{ es: "la cerveza", en: "beer", type: "noun" },
+{ es: "el vino", en: "wine", type: "noun" },
+{ es: "el licor", en: "liquor", type: "noun" },
+{ es: "el batido", en: "milkshake / smoothie", type: "noun" },
+{ es: "la sidra", en: "cider", type: "noun" },
+
+// Snacks & Sweets (Golosinas y Postres)
+{ es: "el chocolate", en: "chocolate", type: "noun" },
+{ es: "el caramelo", en: "candy", type: "noun" },
+{ es: "la patata frita", en: "potato chip", type: "noun" },
+{ es: "el chicle", en: "chewing gum", type: "noun" },
+{ es: "el postre", en: "dessert", type: "noun" },
+{ es: "la merienda", en: "snack", type: "noun" },
+{ es: "las palomitas", en: "popcorn", type: "noun" },
+{ es: "la gelatina", en: "jello / gelatin", type: "noun" },
+{ es: "el bombón", en: "marshmallow / chocolate treat", type: "noun" },
+{ es: "el cacahuate", en: "peanut (Mexico)", type: "noun" },
+
+// --- VERBS: Shopping & Cooking Actions (50 Verbs) ---
+{ es: "comprar", en: "to buy", type: "verb" },
+{ es: "vender", en: "to sell", type: "verb" },
+{ es: "pagar", en: "to pay", type: "verb" },
+{ es: "costar", en: "to cost", type: "verb" },
+{ es: "llevar", en: "to take / to carry", type: "verb" },
+{ es: "buscar", en: "to look for", type: "verb" },
+{ es: "encontrar", en: "to find", type: "verb" },
+{ es: "elegir", en: "to choose", type: "verb" },
+{ es: "escoger", en: "to pick / select", type: "verb" },
+{ es: "seleccionar", en: "to select", type: "verb" },
+{ es: "añadir", en: "to add", type: "verb" },
+{ es: "quitar", en: "to remove", type: "verb" },
+{ es: "pesar", en: "to weigh", type: "verb" },
+{ es: "escanear", en: "to scan", type: "verb" },
+{ es: "empacar", en: "to pack / to bag", type: "verb" },
+{ es: "guardar", en: "to put away / to keep", type: "verb" },
+{ es: "gastar", en: "to spend (money)", type: "verb" },
+{ es: "ahorrar", en: "to save (money/time)", type: "verb" },
+{ es: "rebajar", en: "to lower price / discount", type: "verb" },
+{ es: "ofrecer", en: "to offer", type: "verb" },
+{ es: "necesitar", en: "to need", type: "verb" },
+{ es: "querer", en: "to want", type: "verb" },
+{ es: "desear", en: "to desire / wish", type: "verb" },
+{ es: "preferir", en: "to prefer", type: "verb" },
+{ es: "consumir", en: "to consume", type: "verb" },
+{ es: "comer", en: "to eat", type: "verb" },
+{ es: "beber", en: "to drink", type: "verb" },
+{ es: "tomar", en: "to take / to drink", type: "verb" },
+{ es: "cocinar", en: "to cook", type: "verb" },
+{ es: "preparar", en: "to prepare", type: "verb" },
+{ es: "hornear", en: "to bake", type: "verb" },
+{ es: "freír", en: "to fry", type: "verb" },
+{ es: "hervir", en: "to boil", type: "verb" },
+{ es: "asar", en: "to roast / to grill", type: "verb" },
+{ es: "pelar", en: "to peel", type: "verb" },
+{ es: "cortar", en: "to cut", type: "verb" },
+{ es: "picar", en: "to chop / to mince", type: "verb" },
+{ es: "lavar", en: "to wash", type: "verb" },
+{ es: "limpiar", en: "to clean", type: "verb" },
+{ es: "probar", en: "to taste / to try", type: "verb" },
+{ es: "caducar", en: "to expire", type: "verb" },
+{ es: "devolver", en: "to return (an item)", type: "verb" },
+{ es: "reclamar", en: "to complain / to claim", type: "verb" },
+{ es: "cambiar", en: "to change / to exchange", type: "verb" },
+{ es: "comparar", en: "to compare", type: "verb" },
+{ es: "leer", en: "to read (labels)", type: "verb" },
+{ es: "llenar", en: "to fill", type: "verb" },
+{ es: "vaciar", en: "to empty", type: "verb" },
+{ es: "abrir", en: "to open", type: "verb" },
+{ es: "cerrar", en: "to close", type: "verb" },
+
+ ];
+
+    let currentDeck = [...allVocab];
+    let currentIndex = 0;
+
+    const cardElement = document.getElementById('flashcard');
+    const esWordElement = document.getElementById('es-word');
+    const enWordElement = document.getElementById('en-word');
+    const esTypeElement = document.getElementById('es-type');
+    const enTypeElement = document.getElementById('en-type');
+    const counterElement = document.getElementById('counter');
+
+    function updateCard() {
+        if (currentDeck.length === 0) {
+            esWordElement.textContent = "No cards";
+            enWordElement.textContent = "No cards";
+            esTypeElement.textContent = "";
+            enTypeElement.textContent = "";
+            counterElement.textContent = "0 / 0";
+            return;
+        }
+
+        cardElement.classList.remove('is-flipped');
+        
+        setTimeout(() => {
+            const card = currentDeck[currentIndex];
+            esWordElement.textContent = card.es;
+            enWordElement.textContent = card.en;
+            esTypeElement.textContent = card.type;
+            enTypeElement.textContent = card.type;
+            counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+        }, 150);
+    }
+
+    function flipCard() {
+        if (currentDeck.length > 0) {
+            cardElement.classList.toggle('is-flipped');
+        }
+    }
+
+    function nextCard() {
+        if (currentDeck.length > 0) {
+            currentIndex = (currentIndex + 1) % currentDeck.length;
+            updateCard();
+        }
+    }
+
+    function prevCard() {
+        if (currentDeck.length > 0) {
+            currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+            updateCard();
+        }
+    }
+
+    function filterCards() {
+        const filterValue = document.getElementById('typeFilter').value;
+        
+        if (filterValue === 'all') {
+            currentDeck = [...allVocab];
+        } else if (filterValue === 'clean') {
+            // Exclude any type starting with 'profanity-'
+            currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
+        } else if (filterValue === 'profanity-only') {
+            // Include only types starting with 'profanity-'
+            currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
+        } else {
+            // Filter by specific clean category (noun, verb, phrase)
+            currentDeck = allVocab.filter(word => word.type === filterValue);
+        }
+        
+        currentIndex = 0;
+        updateCard();
+    }
+
+    function shuffleCards() {
+        for (let i = currentDeck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+        }
+        currentIndex = 0;
+        updateCard();
+    }
+
+    updateCard();
+</script>
