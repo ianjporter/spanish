@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Deck Template</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --warning-accent: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button, select {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--accent);
+            color: var(--white);
+            transition: background-color 0.3s ease;
+        }
+        button:hover, select:hover {
+            background-color: #2980b9;
+        }
+        .flashcard-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+        .word {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+        .type-badge {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .flashcard-back .type-badge {
+            background: rgba(255,255,255,0.2);
+        }
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vocabulary Deck Template</h1>
+    
+    <div class="controls">
+        <select id="typeFilter" onchange="filterCards()">
+            <option value="all">All Words (Includes Profanity)</option>
+            <option value="clean">Clean Deck (No Profanity)</option>
+            <option value="profanity-only">Profanity & Slang Only</option>
+            <option value="noun">Nouns Only (Clean)</option>
+            <option value="verb">Verbs Only (Clean)</option>
+            <option value="phrase">Phrases Only (Clean)</option>
+        </select>
+        <button onclick="shuffleCards()">Shuffle Deck</button>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+                <div class="word" id="es-word">Cargando...</div>
+                <div class="type-badge" id="es-type">...</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div class="word" id="en-word">Loading...</div>
+                <div class="type-badge" id="en-type">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button onclick="prevCard()">&#8592; Previous</button>
+        <div class="counter" id="counter">0 / 0</div>
+        <button onclick="nextCard()">Next &#8594;</button>
+    </div>
+
+    <script>
+        // Vocabulary Database
+        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
+        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        const allVocab = [
+    
+
+
+
+
+// --- NOUNS: School, Books & Writing (150 Nouns) ---
+    // School Environment & People
+    { es: "la escuela", en: "school", type: "noun" },
+    { es: "el colegio", en: "school / college (region dependent)", type: "noun" },
+    { es: "la primaria", en: "elementary school", type: "noun" },
+    { es: "la secundaria", en: "middle school / high school", type: "noun" },
+    { es: "la preparatoria", en: "high school (Mexico)", type: "noun" },
+    { es: "la academia", en: "academy", type: "noun" },
+    { es: "el instituto", en: "institute / high school (Spain)", type: "noun" },
+    { es: "el aula", en: "classroom", type: "noun" },
+    { es: "el salón de clases", en: "classroom", type: "noun" },
+    { es: "el pasillo", en: "hallway", type: "noun" },
+    { es: "el casillero", en: "locker (LatAm)", type: "noun" },
+    { es: "la taquilla", en: "locker (Spain)", type: "noun" },
+    { es: "el gimnasio", en: "gymnasium", type: "noun" },
+    { es: "la cafetería", en: "cafeteria", type: "noun" },
+    { es: "el recreo", en: "recess / break", type: "noun" },
+    { es: "el patio", en: "courtyard / playground", type: "noun" },
+    { es: "el maestro", en: "teacher (male)", type: "noun" },
+    { es: "la maestra", en: "teacher (female)", type: "noun" },
+    { es: "el alumno", en: "student (male)", type: "noun" },
+    { es: "la alumna", en: "student (female)", type: "noun" },
+    { es: "el director", en: "principal / director (male)", type: "noun" },
+    { es: "la directora", en: "principal / director (female)", type: "noun" },
+    { es: "el subdirector", en: "vice principal", type: "noun" },
+    { es: "el conserje", en: "janitor / custodian", type: "noun" },
+    { es: "el compañero", en: "classmate (male)", type: "noun" },
+    { es: "la compañera", en: "classmate (female)", type: "noun" },
+    { es: "el tutor", en: "tutor (male)", type: "noun" },
+    { es: "la tutora", en: "tutor (female)", type: "noun" },
+    { es: "el pupitre", en: "student desk", type: "noun" },
+    { es: "el escritorio", en: "teacher's desk", type: "noun" },
+
+    // Classroom Supplies & Materials
+    { es: "el pizarrón", en: "chalkboard / whiteboard", type: "noun" },
+    { es: "la pizarra", en: "chalkboard / whiteboard", type: "noun" },
+    { es: "la tiza", en: "chalk", type: "noun" },
+    { es: "el marcador", en: "marker", type: "noun" },
+    { es: "el borrador", en: "eraser (for board)", type: "noun" },
+    { es: "la goma de borrar", en: "eraser (for pencil)", type: "noun" },
+    { es: "el bolígrafo", en: "pen", type: "noun" },
+    { es: "la pluma", en: "pen (LatAm)", type: "noun" },
+    { es: "el lápiz", en: "pencil", type: "noun" },
+    { es: "el sacapuntas", en: "pencil sharpener", type: "noun" },
+    { es: "el estuche", en: "pencil case", type: "noun" },
+    { es: "la mochila", en: "backpack", type: "noun" },
+    { es: "el cuaderno", en: "notebook", type: "noun" },
+    { es: "la libreta", en: "notebook", type: "noun" },
+    { es: "la carpeta", en: "folder / binder", type: "noun" },
+    { es: "el papel", en: "paper", type: "noun" },
+    { es: "la hoja", en: "sheet (of paper)", type: "noun" },
+    { es: "el folio", en: "sheet of paper (Spain)", type: "noun" },
+    { es: "la regla", en: "ruler", type: "noun" },
+    { es: "las tijeras", en: "scissors", type: "noun" },
+    { es: "el pegamento", en: "glue", type: "noun" },
+    { es: "el celo", en: "tape (Spain)", type: "noun" },
+    { es: "la cinta adhesiva", en: "adhesive tape", type: "noun" },
+    { es: "la calculadora", en: "calculator", type: "noun" },
+    { es: "el compás", en: "compass (geometry)", type: "noun" },
+
+    // Academics & Assignments
+    { es: "la tarea", en: "homework", type: "noun" },
+    { es: "los deberes", en: "homework (Spain)", type: "noun" },
+    { es: "el proyecto", en: "project", type: "noun" },
+    { es: "la presentación", en: "presentation", type: "noun" },
+    { es: "el examen", en: "exam", type: "noun" },
+    { es: "la prueba", en: "quiz / test", type: "noun" },
+    { es: "el control", en: "quiz (Spain)", type: "noun" },
+    { es: "la nota", en: "grade / note", type: "noun" },
+    { es: "la calificación", en: "grade", type: "noun" },
+    { es: "el boletín", en: "report card", type: "noun" },
+    { es: "la boleta", en: "report card (LatAm)", type: "noun" },
+    { es: "el semestre", en: "semester", type: "noun" },
+    { es: "el trimestre", en: "trimester / quarter", type: "noun" },
+    { es: "el horario", en: "schedule", type: "noun" },
+    { es: "la asignatura", en: "subject / course", type: "noun" },
+    { es: "la materia", en: "subject (LatAm)", type: "noun" },
+    { es: "las matemáticas", en: "mathematics", type: "noun" },
+    { es: "la ciencia", en: "science", type: "noun" },
+    { es: "la biología", en: "biology", type: "noun" },
+    { es: "la química", en: "chemistry", type: "noun" },
+    { es: "la física", en: "physics", type: "noun" },
+    { es: "la historia", en: "history", type: "noun" },
+    { es: "la geografía", en: "geography", type: "noun" },
+    { es: "la filosofía", en: "philosophy", type: "noun" },
+    { es: "la informática", en: "computer science", type: "noun" },
+
+    // Books, Genres & Parts of a Book
+    { es: "el libro", en: "book", type: "noun" },
+    { es: "el libro de texto", en: "textbook", type: "noun" },
+    { es: "el manual", en: "manual", type: "noun" },
+    { es: "el diccionario", en: "dictionary", type: "noun" },
+    { es: "la enciclopedia", en: "encyclopedia", type: "noun" },
+    { es: "la novela", en: "novel", type: "noun" },
+    { es: "el cuento", en: "short story", type: "noun" },
+    { es: "la poesía", en: "poetry", type: "noun" },
+    { es: "el poema", en: "poem", type: "noun" },
+    { es: "el cómic", en: "comic book", type: "noun" },
+    { es: "la historieta", en: "comic / graphic novel", type: "noun" },
+    { es: "la biografía", en: "biography", type: "noun" },
+    { es: "la autobiografía", en: "autobiography", type: "noun" },
+    { es: "el misterio", en: "mystery", type: "noun" },
+    { es: "la fantasía", en: "fantasy", type: "noun" },
+    { es: "la ciencia ficción", en: "science fiction", type: "noun" },
+    { es: "el romance", en: "romance", type: "noun" },
+    { es: "la portada", en: "cover / front page", type: "noun" },
+    { es: "la contraportada", en: "back cover", type: "noun" },
+    { es: "el lomo", en: "spine (of a book)", type: "noun" },
+    { es: "el capítulo", en: "chapter", type: "noun" },
+    { es: "la página", en: "page", type: "noun" },
+    { es: "el título", en: "title", type: "noun" },
+    { es: "el subtítulo", en: "subtitle", type: "noun" },
+    { es: "el índice", en: "index / table of contents", type: "noun" },
+    { es: "el glosario", en: "glossary", type: "noun" },
+    { es: "el apéndice", en: "appendix", type: "noun" },
+    { es: "el prólogo", en: "prologue", type: "noun" },
+    { es: "el epílogo", en: "epilogue", type: "noun" },
+    { es: "la dedicatoria", en: "dedication", type: "noun" },
+    { es: "el marcapáginas", en: "bookmark (Spain)", type: "noun" },
+    { es: "el separador", en: "bookmark (LatAm)", type: "noun" },
+    { es: "el audiolibro", en: "audiobook", type: "noun" },
+    { es: "el libro electrónico", en: "e-book", type: "noun" },
+    { es: "la biblioteca", en: "library", type: "noun" },
+
+    // Writing, Grammar & Literature
+    { es: "el autor", en: "author (male)", type: "noun" },
+    { es: "la autora", en: "author (female)", type: "noun" },
+    { es: "el escritor", en: "writer (male)", type: "noun" },
+    { es: "la escritora", en: "writer (female)", type: "noun" },
+    { es: "el poeta", en: "poet", type: "noun" },
+    { es: "el lector", en: "reader (male)", type: "noun" },
+    { es: "la lectora", en: "reader (female)", type: "noun" },
+    { es: "el personaje", en: "character", type: "noun" },
+    { es: "el protagonista", en: "protagonist", type: "noun" },
+    { es: "el antagonista", en: "antagonist", type: "noun" },
+    { es: "el narrador", en: "narrator", type: "noun" },
+    { es: "la trama", en: "plot", type: "noun" },
+    { es: "el argumento", en: "plot / argument", type: "noun" },
+    { es: "el tema", en: "theme / subject", type: "noun" },
+    { es: "el conflicto", en: "conflict", type: "noun" },
+    { es: "el desenlace", en: "ending / resolution", type: "noun" },
+    { es: "el párrafo", en: "paragraph", type: "noun" },
+    { es: "la oración", en: "sentence", type: "noun" },
+    { es: "la frase", en: "phrase", type: "noun" },
+    { es: "la palabra", en: "word", type: "noun" },
+    { es: "la letra", en: "letter (of the alphabet)", type: "noun" },
+    { es: "el alfabeto", en: "alphabet", type: "noun" },
+    { es: "el abecedario", en: "alphabet", type: "noun" },
+    { es: "la vocal", en: "vowel", type: "noun" },
+    { es: "la consonante", en: "consonant", type: "noun" },
+    { es: "la sílaba", en: "syllable", type: "noun" },
+    { es: "la gramática", en: "grammar", type: "noun" },
+    { es: "la ortografía", en: "spelling", type: "noun" },
+    { es: "la sintaxis", en: "syntax", type: "noun" },
+    { es: "el vocabulario", en: "vocabulary", type: "noun" },
+    { es: "el verbo", en: "verb", type: "noun" },
+    { es: "el sustantivo", en: "noun", type: "noun" },
+    { es: "el adjetivo", en: "adjective", type: "noun" },
+    { es: "el borrador", en: "draft", type: "noun" },
+    { es: "el ensayo", en: "essay", type: "noun" },
+
+    // --- VERBS: Studying, Reading & Writing Actions (50 Verbs) ---
+    { es: "leer", en: "to read", type: "verb" },
+    { es: "escribir", en: "to write", type: "verb" },
+    { es: "redactar", en: "to draft / to write", type: "verb" },
+    { es: "estudiar", en: "to study", type: "verb" },
+    { es: "aprender", en: "to learn", type: "verb" },
+    { es: "enseñar", en: "to teach", type: "verb" },
+    { es: "educar", en: "to educate", type: "verb" },
+    { es: "apuntar", en: "to take notes / to aim", type: "verb" },
+    { es: "anotar", en: "to note down", type: "verb" },
+    { es: "subrayar", en: "to underline", type: "verb" },
+    { es: "resaltar", en: "to highlight", type: "verb" },
+    { es: "borrar", en: "to erase", type: "verb" },
+    { es: "trazar", en: "to trace / to draw", type: "verb" },
+    { es: "deletrear", en: "to spell", type: "verb" },
+    { es: "pronunciar", en: "to pronounce", type: "verb" },
+    { es: "traducir", en: "to translate", type: "verb" },
+    { es: "analizar", en: "to analyze", type: "verb" },
+    { es: "resumir", en: "to summarize", type: "verb" },
+    { es: "sintetizar", en: "to synthesize", type: "verb" },
+    { es: "esquematizar", en: "to outline", type: "verb" },
+    { es: "citar", en: "to cite / to quote", type: "verb" },
+    { es: "referenciar", en: "to reference", type: "verb" },
+    { es: "plagiar", en: "to plagiarize", type: "verb" },
+    { es: "revisar", en: "to review / to check", type: "verb" },
+    { es: "corregir", en: "to correct / to grade", type: "verb" },
+    { es: "editar", en: "to edit", type: "verb" },
+    { es: "publicar", en: "to publish", type: "verb" },
+    { es: "imprimir", en: "to print", type: "verb" },
+    { es: "encuadernar", en: "to bind (a book)", type: "verb" },
+    { es: "hojear", en: "to leaf through / to skim", type: "verb" },
+    { es: "prestar", en: "to lend", type: "verb" },
+    { es: "devolver", en: "to return (an item)", type: "verb" },
+    { es: "renovar", en: "to renew", type: "verb" },
+    { es: "evaluar", en: "to assess / to evaluate", type: "verb" },
+    { es: "calificar", en: "to grade", type: "verb" },
+    { es: "examinar", en: "to examine / to test", type: "verb" },
+    { es: "aprobar", en: "to pass (an exam)", type: "verb" },
+    { es: "suspender", en: "to fail (Spain)", type: "verb" },
+    { es: "reprobar", en: "to fail (LatAm)", type: "verb" },
+    { es: "graduarse", en: "to graduate", type: "verb" },
+    { es: "matricularse", en: "to enroll / to register", type: "verb" },
+    { es: "inscribirse", en: "to sign up / to enroll", type: "verb" },
+    { es: "asistir", en: "to attend", type: "verb" },
+    { es: "faltar", en: "to be absent", type: "verb" },
+    { es: "memorizar", en: "to memorize", type: "verb" },
+    { es: "comprender", en: "to comprehend", type: "verb" },
+    { es: "entender", en: "to understand", type: "verb" },
+    { es: "repasar", en: "to review / to study", type: "verb" },
+    { es: "investigar", en: "to research", type: "verb" },
+    { es: "preguntar", en: "to ask a question", type: "verb" },
+
+    
+
+       ];
+
+        let currentDeck = [...allVocab];
+        let currentIndex = 0;
+
+        const cardElement = document.getElementById('flashcard');
+        const esWordElement = document.getElementById('es-word');
+        const enWordElement = document.getElementById('en-word');
+        const esTypeElement = document.getElementById('es-type');
+        const enTypeElement = document.getElementById('en-type');
+        const counterElement = document.getElementById('counter');
+
+        function updateCard() {
+            if (currentDeck.length === 0) {
+                esWordElement.textContent = "No cards";
+                enWordElement.textContent = "No cards";
+                esTypeElement.textContent = "";
+                enTypeElement.textContent = "";
+                counterElement.textContent = "0 / 0";
+                return;
+            }
+
+            cardElement.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                const card = currentDeck[currentIndex];
+                esWordElement.textContent = card.es;
+                enWordElement.textContent = card.en;
+                esTypeElement.textContent = card.type;
+                enTypeElement.textContent = card.type;
+                counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            if (currentDeck.length > 0) {
+                cardElement.classList.toggle('is-flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex + 1) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function filterCards() {
+            const filterValue = document.getElementById('typeFilter').value;
+            
+            if (filterValue === 'all') {
+                currentDeck = [...allVocab];
+            } else if (filterValue === 'clean') {
+                // Exclude any type starting with 'profanity-'
+                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
+            } else if (filterValue === 'profanity-only') {
+                // Include only types starting with 'profanity-'
+                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
+            } else {
+                // Filter by specific clean category (noun, verb, phrase)
+                currentDeck = allVocab.filter(word => word.type === filterValue);
+            }
+            
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function shuffleCards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
+
