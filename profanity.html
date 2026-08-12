@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profanity Vocabulary Deck</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --warning-accent: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button, select {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--accent);
+            color: var(--white);
+            transition: background-color 0.3s ease;
+        }
+        button:hover, select:hover {
+            background-color: #2980b9;
+        }
+        .flashcard-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+        .word {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+        .type-badge {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .flashcard-back .type-badge {
+            background: rgba(255,255,255,0.2);
+        }
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Profanity Vocabulary Deck</h1>
+    
+    <div class="controls">
+        <select id="typeFilter" onchange="filterCards()">
+            <option value="all">All Words (Includes Profanity)</option>
+            <option value="clean">Clean Deck (No Profanity)</option>
+            <option value="profanity-only">Profanity & Slang Only</option>
+            <option value="noun">Nouns Only (Clean)</option>
+            <option value="verb">Verbs Only (Clean)</option>
+            <option value="phrase">Phrases Only (Clean)</option>
+        </select>
+        <button onclick="shuffleCards()">Shuffle Deck</button>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+                <div class="word" id="es-word">Cargando...</div>
+                <div class="type-badge" id="es-type">...</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div class="word" id="en-word">Loading...</div>
+                <div class="type-badge" id="en-type">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button onclick="prevCard()">&#8592; Previous</button>
+        <div class="counter" id="counter">0 / 0</div>
+        <button onclick="nextCard()">Next &#8594;</button>
+    </div>
+
+    <script>
+        // Vocabulary Database
+        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
+        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        const allVocab = [
+
+
+// --- NOUNS: Profanity, Anatomical Slang & Insults (150 Nouns) ---
+    // General Insults & Profanity
+    { es: "la mierda", en: "shit (Universal)", type: "profanity-noun" },
+    { es: "el cabrón", en: "bastard / asshole (Spain/Mexico)", type: "profanity-noun" },
+    { es: "la cabrona", en: "bitch / tough woman (Spain/Mexico)", type: "profanity-noun" },
+    { es: "el pendejo", en: "idiot / asshole (Mexico/LatAm)", type: "profanity-noun" },
+    { es: "la pendeja", en: "idiot (Mexico/LatAm)", type: "profanity-noun" },
+    { es: "el gilipollas", en: "idiot / asshole (Spain)", type: "profanity-noun" },
+    { es: "el boludo", en: "idiot / dude (Argentina/Uruguay)", type: "profanity-noun" },
+    { es: "el pelotudo", en: "huge idiot / asshole (Argentina)", type: "profanity-noun" },
+    { es: "el huevón", en: "lazy idiot / dude (Chile/Mexico)", type: "profanity-noun" },
+    { es: "el weón", en: "dude / idiot (Chile)", type: "profanity-noun" },
+    { es: "el culero", en: "asshole / coward (Mexico)", type: "profanity-noun" },
+    { es: "el coño", en: "cunt / damn (Spain/Caribbean)", type: "profanity-noun" },
+    { es: "el carajo", en: "hell / damn (Universal LatAm)", type: "profanity-noun" },
+    { es: "la hostia", en: "host / holy shit (Spain)", type: "profanity-noun" },
+    { es: "la puta", en: "whore / bitch (Universal)", type: "profanity-noun" },
+    { es: "el puto", en: "fucking [adj] / male prostitute (Universal)", type: "profanity-noun" },
+    { es: "la ramera", en: "whore / prostitute (Universal)", type: "profanity-noun" },
+    { es: "la zorra", en: "bitch / slut (Spain/Mexico)", type: "profanity-noun" },
+    { es: "la perra", en: "bitch (Universal)", type: "profanity-noun" },
+    { es: "el hijo de puta", en: "son of a bitch (Universal)", type: "profanity-noun" },
+    { es: "el hijueputa", en: "son of a bitch (Colombia/Central America)", type: "profanity-noun" },
+    { es: "el conchesumadre", en: "motherfucker (Chile/Peru)", type: "profanity-noun" },
+    { es: "el cerote", en: "turd / piece of shit (Central America/Mexico)", type: "profanity-noun" },
+    { es: "la gonorrea", en: "despicable person (Colombia)", type: "profanity-noun" },
+    { es: "el malparido", en: "bastard (Colombia/LatAm)", type: "profanity-noun" },
+    { es: "el maricón", en: "faggot (Universal)", type: "profanity-noun" },
+    { es: "el marica", en: "faggot / dude (Colombia/Spain)", type: "profanity-noun" },
+    { es: "el cabro", en: "faggot (Peru)", type: "profanity-noun" },
+    { es: "el playo", en: "faggot (Costa Rica)", type: "profanity-noun" },
+    { es: "el pato", en: "faggot (Puerto Rico)", type: "profanity-noun" },
+    { es: "el pajero", en: "wanker / lazy (Spain/Argentina)", type: "profanity-noun" },
+    { es: "el chaquetero", en: "wanker / traitor (Mexico)", type: "profanity-noun" },
+    { es: "el puñetero", en: "damn / annoying person (Spain/Puerto Rico)", type: "profanity-noun" },
+    { es: "el jilipollas", en: "idiot (Spain - alt spelling)", type: "profanity-noun" },
+    { es: "el capullo", en: "dickhead / asshole (Spain)", type: "profanity-noun" },
+    { es: "el mamón", en: "sucker / annoying person (Mexico/Spain)", type: "profanity-noun" },
+    { es: "el pringao", en: "loser / gullible person (Spain)", type: "profanity-noun" },
+    { es: "el tarado", en: "moron (Universal)", type: "profanity-noun" },
+    { es: "el imbécil", en: "imbecile (Universal)", type: "profanity-noun" },
+    { es: "el idiota", en: "idiot (Universal)", type: "profanity-noun" },
+    { es: "el estúpido", en: "stupid (Universal)", type: "profanity-noun" },
+    { es: "el baboso", en: "idiot / creep (Mexico/LatAm)", type: "profanity-noun" },
+    { es: "el arrastrado", en: "suck-up (LatAm)", type: "profanity-noun" },
+    { es: "el chupamedias", en: "kiss-ass (Argentina/LatAm)", type: "profanity-noun" },
+    { es: "el lameculos", en: "ass-kisser (Spain/LatAm)", type: "profanity-noun" },
+    { es: "el chupapollas", en: "cocksucker (Spain)", type: "profanity-noun" },
+    { es: "el chupaespadas", en: "cocksucker (LatAm)", type: "profanity-noun" },
+    { es: "el cagón", en: "coward / shitter (Universal)", type: "profanity-noun" },
+    { es: "el meapilas", en: "hypocritical overly religious person (Spain)", type: "profanity-noun" },
+    { es: "el tocapelotas", en: "ball-breaker / annoying person (Spain)", type: "profanity-noun" },
+
+    // Anatomical Slang (Male & Female)
+    { es: "el culo", en: "ass (Universal)", type: "profanity-noun" },
+    { es: "el orto", en: "asshole (Argentina/Uruguay)", type: "profanity-noun" },
+    { es: "el ojete", en: "asshole (Mexico/Spain)", type: "profanity-noun" },
+    { es: "la raja", en: "ass crack (Universal)", type: "profanity-noun" },
+    { es: "la verga", en: "dick / cock (Mexico/LatAm)", type: "profanity-noun" },
+    { es: "la polla", en: "dick / cock (Spain)", type: "profanity-noun" },
+    { es: "el pito", en: "dick (Mexico/LatAm)", type: "profanity-noun" },
+    { es: "el chile", en: "dick (Mexico)", type: "profanity-noun" },
+    { es: "el bicho", en: "dick (Puerto Rico)", type: "profanity-noun" },
+    { es: "el pico", en: "dick (Chile)", type: "profanity-noun" },
+    { es: "el cipote", en: "dick (Spain / El Salvador [kid])", type: "profanity-noun" },
+    { es: "el rabo", en: "dick / tail (Spain/Caribbean)", type: "profanity-noun" },
+    { es: "la tranca", en: "huge dick (LatAm)", type: "profanity-noun" },
+    { es: "el nabo", en: "dick (Argentina/Spain)", type: "profanity-noun" },
+    { es: "el banano", en: "dick (LatAm)", type: "profanity-noun" },
+    { es: "el mazo", en: "dick (LatAm)", type: "profanity-noun" },
+    { es: "el palo", en: "dick / erection (Universal)", type: "profanity-noun" },
+    { es: "el plátano", en: "dick (LatAm)", type: "profanity-noun" },
+    { es: "el miembro", en: "member (Universal)", type: "profanity-noun" },
+    { es: "el aparato", en: "apparatus / dick (Universal)", type: "profanity-noun" },
+    { es: "los cojones", en: "balls / testicles (Spain/Caribbean)", type: "profanity-noun" },
+    { es: "los huevos", en: "balls (Mexico/LatAm)", type: "profanity-noun" },
+    { es: "las pelotas", en: "balls (Universal)", type: "profanity-noun" },
+    { es: "las bolas", en: "balls (Universal)", type: "profanity-noun" },
+    { es: "los huevos", en: "balls (Universal)", type: "profanity-noun" },
+    { es: "las tetas", en: "tits (Universal)", type: "profanity-noun" },
+    { es: "las gomas", en: "tits (Argentina)", type: "profanity-noun" },
+    { es: "las lolas", en: "tits (Argentina/Chile)", type: "profanity-noun" },
+    { es: "las chichis", en: "tits (Mexico)", type: "profanity-noun" },
+    { es: "los pechos", en: "breasts (Universal)", type: "profanity-noun" },
+    { es: "la concha", en: "cunt / vagina (Argentina/South America)", type: "profanity-noun" },
+    { es: "la chucha", en: "cunt / vagina (Chile/Colombia)", type: "profanity-noun" },
+    { es: "la cuca", en: "pussy (Colombia/Venezuela)", type: "profanity-noun" },
+    { es: "la panocha", en: "pussy (Mexico)", type: "profanity-noun" },
+    { es: "la papaya", en: "pussy (Cuba/Caribbean)", type: "profanity-noun" },
+    { es: "el toto", en: "pussy (Puerto Rico/Dominican Republic)", type: "profanity-noun" },
+    { es: "el chocho", en: "pussy (Spain)", type: "profanity-noun" },
+    { es: "el coño", en: "pussy (Spain/Caribbean)", type: "profanity-noun" },
+    { es: "el bollo", en: "pussy (Panama)", type: "profanity-noun" },
+    { es: "la raja", en: "slit / pussy (LatAm)", type: "profanity-noun" },
+    { es: "el chichi", en: "pussy (Spain)", type: "profanity-noun" },
+    { es: "el sapo", en: "pussy (Peru/LatAm)", type: "profanity-noun" },
+    { es: "la vulva", en: "vulva (Universal)", type: "profanity-noun" },
+    { es: "la vagina", en: "vagina (Universal)", type: "profanity-noun" },
+    { es: "el pene", en: "penis (Universal)", type: "profanity-noun" },
+
+    // Sexual Acts & Bodily Functions
+    { es: "la paja", en: "masturbation / wank (Universal)", type: "profanity-noun" },
+    { es: "la chaqueta", en: "masturbation (Mexico)", type: "profanity-noun" },
+    { es: "la puñeta", en: "masturbation (Spain/Puerto Rico)", type: "profanity-noun" },
+    { es: "la mamada", en: "blowjob (Universal)", type: "profanity-noun" },
+    { es: "la chupada", en: "blowjob (LatAm)", type: "profanity-noun" },
+    { es: "el pete", en: "blowjob (Argentina)", type: "profanity-noun" },
+    { es: "la francesa", en: "blowjob (Spain)", type: "profanity-noun" },
+    { es: "el polvo", en: "fuck / sexual encounter (Spain/LatAm)", type: "profanity-noun" },
+    { es: "el kiki", en: "quickie (Spain)", type: "profanity-noun" },
+    { es: "el garche", en: "fuck / hookup (Argentina)", type: "profanity-noun" },
+    { es: "el culeo", en: "fucking (LatAm)", type: "profanity-noun" },
+    { es: "la follada", en: "fucking (Spain)", type: "profanity-noun" },
+    { es: "la cogida", en: "fucking (LatAm)", type: "profanity-noun" },
+    { es: "la chingada", en: "fucking / ruin (Mexico)", type: "profanity-noun" },
+    { es: "el orgasmo", en: "orgasm (Universal)", type: "profanity-noun" },
+    { es: "el semen", en: "semen (Universal)", type: "profanity-noun" },
+    { es: "la leche", en: "cum / milk (Universal)", type: "profanity-noun" },
+    { es: "los meados", en: "piss (Universal)", type: "profanity-noun" },
+    { es: "la meada", en: "pissing (Universal)", type: "profanity-noun" },
+    { es: "los cagados", en: "shit (Universal)", type: "profanity-noun" },
+    { es: "la cagada", en: "fuck-up / shit (Universal)", type: "profanity-noun" },
+    { es: "el pedo", en: "fart / drunkenness (Universal)", type: "profanity-noun" },
+    { es: "la borrachera", en: "drunkenness (Universal)", type: "profanity-noun" },
+    { es: "la cruda", en: "hangover (Mexico)", type: "profanity-noun" },
+    { es: "la resaca", en: "hangover (Universal)", type: "profanity-noun" },
+    { es: "el polvo", en: "fuck (Spain)", type: "profanity-noun" },
+    { es: "el rapidito", en: "quickie (LatAm)", type: "profanity-noun" },
+    { es: "el trio", en: "threesome (Universal)", type: "profanity-noun" },
+    { es: "la orgía", en: "orgy (Universal)", type: "profanity-noun" },
+    { es: "el gatillazo", en: "loss of erection (Spain)", type: "profanity-noun" },
+    { es: "el condón", en: "condom (Universal)", type: "profanity-noun" },
+    { es: "el forro", en: "condom (Argentina)", type: "profanity-noun" },
+    { es: "el preservativo", en: "condom (Universal)", type: "profanity-noun" },
+    { es: "el cabaré", en: "brothel / cabaret (Universal)", type: "profanity-noun" },
+    { es: "el puticlub", en: "brothel (Spain)", type: "profanity-noun" },
+    { es: "el prostíbulo", en: "brothel (Universal)", type: "profanity-noun" },
+    { es: "el quilombo", en: "brothel / mess (Argentina)", type: "profanity-noun" },
+    { es: "el burdel", en: "brothel (Universal)", type: "profanity-noun" },
+    { es: "el chulo", en: "pimp (Spain/Mexico)", type: "profanity-noun" },
+    { es: "el proxeneta", en: "pimp (Universal)", type: "profanity-noun" },
+    { es: "el cafiche", en: "pimp (South America)", type: "profanity-noun" },
+    { es: "la madama", en: "madam (Universal)", type: "profanity-noun" },
+    { es: "la virgen", en: "virgin (female)", type: "profanity-noun" },
+    { es: "el virgen", en: "virgin (male)", type: "profanity-noun" },
+    { es: "la virginidad", en: "virginity", type: "profanity-noun" },
+    { es: "el sexo", en: "sex", type: "profanity-noun" },
+    { es: "la penetración", en: "penetration", type: "profanity-noun" },
+    { es: "la eyaculación", en: "ejaculation", type: "profanity-noun" },
+    { es: "el lubricante", en: "lubricant", type: "profanity-noun" },
+    { es: "la calentura", en: "horniness (LatAm)", type: "profanity-noun" },
+    { es: "el morbo", en: "morbid curiosity / turn-on (Spain/LatAm)", type: "profanity-noun" },
+    { es: "la lujuria", en: "lust", type: "profanity-noun" },
+    { es: "el sadomasoquismo", en: "BDSM", type: "profanity-noun" },
+    { es: "el fetiche", en: "fetish", type: "profanity-noun" },
+    { es: "el consolador", en: "dildo", type: "profanity-noun" },
+
+    // --- VERBS: Sexual Acts, Profanity & Bodily Functions (100 Verbs) ---
+    { es: "follar", en: "to fuck (Spain)", type: "profanity-verb" },
+    { es: "coger", en: "to fuck (LatAm) / to take (Spain)", type: "profanity-verb" },
+    { es: "joder", en: "to fuck / to annoy (Universal)", type: "profanity-verb" },
+    { es: "chingar", en: "to fuck / to ruin (Mexico)", type: "profanity-verb" },
+    { es: "culiar", en: "to fuck (Chile/LatAm)", type: "profanity-verb" },
+    { es: "garchar", en: "to fuck (Argentina)", type: "profanity-verb" },
+    { es: "pisar", en: "to fuck / to step on (LatAm)", type: "profanity-verb" },
+    { es: "singar", en: "to fuck (Cuba/Caribbean)", type: "profanity-verb" },
+    { es: "tirar", en: "to fuck / to throw (LatAm)", type: "profanity-verb" },
+    { es: "templar", en: "to fuck (Peru)", type: "profanity-verb" },
+    { es: "cachar", en: "to fuck (Peru/Honduras)", type: "profanity-verb" },
+    { es: "empomar", en: "to fuck (Argentina)", type: "profanity-verb" },
+    { es: "clavar", en: "to nail / to fuck (Universal)", type: "profanity-verb" },
+    { es: "ensartar", en: "to skewer / to fuck (Mexico)", type: "profanity-verb" },
+    { es: "meter", en: "to put in / insert (Universal)", type: "profanity-verb" },
+    { es: "sacar", en: "to take out (Universal)", type: "profanity-verb" },
+    { es: "chupar", en: "to suck (Universal)", type: "profanity-verb" },
+    { es: "mamar", en: "to suck (Universal)", type: "profanity-verb" },
+    { es: "lamer", en: "to lick (Universal)", type: "profanity-verb" },
+    { es: "pajear", en: "to masturbate (Universal)", type: "profanity-verb" },
+    { es: "chaquetear", en: "to masturbate (Mexico)", type: "profanity-verb" },
+    { es: "puñetear", en: "to masturbate (Spain/Puerto Rico)", type: "profanity-verb" },
+    { es: "masturbar", en: "to masturbate (Universal)", type: "profanity-verb" },
+    { es: "eyacular", en: "to ejaculate (Universal)", type: "profanity-verb" },
+    { es: "venirse", en: "to cum (Universal)", type: "profanity-verb" },
+    { es: "acabar", en: "to finish / to cum (LatAm)", type: "profanity-verb" },
+    { es: "correrse", en: "to cum (Spain/LatAm)", type: "profanity-verb" },
+    { es: "cagar", en: "to shit (Universal)", type: "profanity-verb" },
+    { es: "mear", en: "to piss (Universal)", type: "profanity-verb" },
+    { es: "orinar", en: "to urinate (Universal)", type: "profanity-verb" },
+    { es: "defecar", en: "to defecate (Universal)", type: "profanity-verb" },
+    { es: "putear", en: "to curse out / to act like a whore (Universal)", type: "profanity-verb" },
+    { es: "cabronear", en: "to act like a bastard / to cheat on (Spain/LatAm)", type: "profanity-verb" },
+    { es: "fastidiar", en: "to annoy / to bother (Universal)", type: "profanity-verb" },
+    { es: "encabronar", en: "to piss off (Mexico/LatAm)", type: "profanity-verb" },
+    { es: "cabrear", en: "to piss off (Spain)", type: "profanity-verb" },
+    { es: "arrechar", en: "to make horny / angry (LatAm)", type: "profanity-verb" },
+    { es: "calentar", en: "to turn on / make horny (Universal)", type: "profanity-verb" },
+    { es: "excitar", en: "to excite / turn on (Universal)", type: "profanity-verb" },
+    { es: "violar", en: "to rape (Universal)", type: "profanity-verb" },
+    { es: "abusar", en: "to abuse (Universal)", type: "profanity-verb" },
+    { es: "desflorar", en: "to deflower (Universal)", type: "profanity-verb" },
+    { es: "fornicar", en: "to fornicate (Universal)", type: "profanity-verb" },
+    { es: "copular", en: "to copulate (Universal)", type: "profanity-verb" },
+    { es: "montar", en: "to mount / to ride (Universal)", type: "profanity-verb" },
+    { es: "cabalgar", en: "to ride (Universal)", type: "profanity-verb" },
+    { es: "empujar", en: "to push / thrust (Universal)", type: "profanity-verb" },
+    { es: "penetrar", en: "to penetrate (Universal)", type: "profanity-verb" },
+    { es: "lubricar", en: "to lubricate (Universal)", type: "profanity-verb" },
+    { es: "gemir", en: "to moan (Universal)", type: "profanity-verb" },
+    { es: "jadear", en: "to pant (Universal)", type: "profanity-verb" },
+    { es: "sudar", en: "to sweat (Universal)", type: "profanity-verb" },
+    { es: "temblar", en: "to tremble (Universal)", type: "profanity-verb" },
+    { es: "besar", en: "to kiss (Universal)", type: "profanity-verb" },
+    { es: "chapar", en: "to make out (Argentina)", type: "profanity-verb" },
+    { es: "morrear", en: "to make out (Spain)", type: "profanity-verb" },
+    { es: "agarrar", en: "to grab / to hook up (LatAm)", type: "profanity-verb" },
+    { es: "toquetear", en: "to grope (Universal)", type: "profanity-verb" },
+    { es: "manosear", en: "to grope / paw at (Universal)", type: "profanity-verb" },
+    { es: "desnudar", en: "to undress (Universal)", type: "profanity-verb" },
+    { es: "encuerar", en: "to strip naked (Mexico)", type: "profanity-verb" },
+    { es: "pelar", en: "to strip / peel (Universal)", type: "profanity-verb" },
+    { es: "abrir", en: "to open (Universal)", type: "profanity-verb" },
+    { es: "cerrar", en: "to close (Universal)", type: "profanity-verb" },
+    { es: "tragar", en: "to swallow (Universal)", type: "profanity-verb" },
+    { es: "escupir", en: "to spit (Universal)", type: "profanity-verb" },
+    { es: "derramar", en: "to spill (Universal)", type: "profanity-verb" },
+    { es: "salpicar", en: "to splash (Universal)", type: "profanity-verb" },
+    { es: "manchar", en: "to stain (Universal)", type: "profanity-verb" },
+    { es: "limpiar", en: "to clean (Universal)", type: "profanity-verb" },
+    { es: "prostituir", en: "to prostitute (Universal)", type: "profanity-verb" },
+    { es: "cobrar", en: "to charge [money] (Universal)", type: "profanity-verb" },
+    { es: "pagar", en: "to pay (Universal)", type: "profanity-verb" },
+    { es: "gemir", en: "to moan (Universal)", type: "profanity-verb" },
+    { es: "suspirar", en: "to sigh (Universal)", type: "profanity-verb" },
+    { es: "arañar", en: "to scratch (Universal)", type: "profanity-verb" },
+    { es: "morder", en: "to bite (Universal)", type: "profanity-verb" },
+    { es: "azotar", en: "to spank / whip (Universal)", type: "profanity-verb" },
+    { es: "nalguear", en: "to spank (LatAm)", type: "profanity-verb" },
+    { es: "pegar", en: "to hit / stick (Universal)", type: "profanity-verb" },
+    { es: "atar", en: "to tie (Universal)", type: "profanity-verb" },
+    { es: "someter", en: "to submit / subdue (Universal)", type: "profanity-verb" },
+    { es: "dominar", en: "to dominate (Universal)", type: "profanity-verb" },
+    { es: "castigar", en: "to punish (Universal)", type: "profanity-verb" },
+    { es: "provocar", en: "to provoke (Universal)", type: "profanity-verb" },
+    { es: "seducir", en: "to seduce (Universal)", type: "profanity-verb" },
+    { es: "coquetear", en: "to flirt (Universal)", type: "profanity-verb" },
+    { es: "insultar", en: "to insult (Universal)", type: "profanity-verb" },
+    { es: "ofender", en: "to offend (Universal)", type: "profanity-verb" },
+    { es: "humillar", en: "to humiliate (Universal)", type: "profanity-verb" },
+    { es: "denigrar", en: "to denigrate (Universal)", type: "profanity-verb" },
+    { es: "cagarla", en: "to fuck up (Universal)", type: "profanity-verb" },
+    { es: "embarrarla", en: "to screw up (LatAm)", type: "profanity-verb" },
+    { es: "liarla", en: "to mess up (Spain)", type: "profanity-verb" },
+    { es: "cagarse", en: "to shit oneself / be terrified (Universal)", type: "profanity-verb" },
+    { es: "mearse", en: "to piss oneself (Universal)", type: "profanity-verb" },
+    { es: "descojonarse", en: "to laugh one's ass off (Spain)", type: "profanity-verb" },
+    { es: "cagarse de risa", en: "to laugh one's ass off (LatAm)", type: "profanity-verb" },
+    { es: "empedarse", en: "to get drunk (Mexico)", type: "profanity-verb" },
+    { es: "emborracharse", en: "to get drunk (Universal)", type: "profanity-verb" },
+
+    // --- PHRASES: Expletives, Slang Idioms & Vulgar Expressions (100 Phrases) ---
+    { es: "me cago en Dios", en: "I shit on God / damn it (Spain)", type: "profanity-phrase" },
+    { es: "me cago en la leche", en: "I shit in the milk / damn it (Spain)", type: "profanity-phrase" },
+    { es: "me cago en la puta", en: "I shit on the whore / fuck! (Spain)", type: "profanity-phrase" },
+    { es: "me cago en diez", en: "I shit on ten / darn it [minced oath] (Spain)", type: "profanity-phrase" },
+    { es: "vete a la mierda", en: "go to shit / fuck off (Universal)", type: "profanity-phrase" },
+    { es: "vete al carajo", en: "go to hell / fuck off (LatAm)", type: "profanity-phrase" },
+    { es: "vete a la verga", en: "go to the dick / fuck off (Mexico/LatAm)", type: "profanity-phrase" },
+    { es: "andate a la concha de tu madre", en: "go to your mother's cunt / fuck off (Argentina)", type: "profanity-phrase" },
+    { es: "la puta que te parió", en: "the whore that birthed you / motherfucker (Argentina/LatAm)", type: "profanity-phrase" },
+    { es: "me vale verga", en: "I don't give a fuck (lit: it's worth dick to me) (Mexico/LatAm)", type: "profanity-phrase" },
+    { es: "me vale madre", en: "I don't give a damn (Mexico)", type: "profanity-phrase" },
+    { es: "me chupa un huevo", en: "I don't give a fuck (lit: it sucks an egg to me) (Argentina)", type: "profanity-phrase" },
+    { es: "me suda la polla", en: "I don't give a fuck (lit: my dick sweats) (Spain)", type: "profanity-phrase" },
+    { es: "me importa un cojón", en: "I don't give a damn (lit: it matters a testicle) (Spain)", type: "profanity-phrase" },
+    { es: "estar hasta los cojones", en: "to be fed up (lit: to be up to the balls) (Spain)", type: "profanity-phrase" },
+    { es: "estar hasta la madre", en: "to be fed up (Mexico)", type: "profanity-phrase" },
+    { es: "ser la hostia", en: "to be fucking awesome / terrible (Spain)", type: "profanity-phrase" },
+    { es: "dar por culo", en: "to annoy / to bug (lit: to give by the ass) (Spain)", type: "profanity-phrase" },
+    { es: "tomar por culo", en: "fuck off (lit: to take by the ass) (Spain)", type: "profanity-phrase" },
+    { es: "mandar a la mierda", en: "to send to shit / tell someone to fuck off (Universal)", type: "profanity-phrase" },
+    { es: "mandar al carajo", en: "to send to hell (Universal)", type: "profanity-phrase" },
+    { es: "irse a la verga", en: "to go to hell / get ruined (Mexico)", type: "profanity-phrase" },
+    { es: "irse a la mierda", en: "to go to shit / get ruined (Universal)", type: "profanity-phrase" },
+    { es: "estar de puta madre", en: "to be fucking great (Spain)", type: "profanity-phrase" },
+    { es: "ser un hijo de puta", en: "to be a son of a bitch (Universal)", type: "profanity-phrase" },
+    { es: "tocar los cojones", en: "to annoy (lit: to touch the balls) (Spain)", type: "profanity-phrase" },
+    { es: "tocar las pelotas", en: "to annoy (lit: to touch the balls) (Universal)", type: "profanity-phrase" },
+    { es: "hinchar las bolas", en: "to annoy (lit: to swell the balls) (LatAm)", type: "profanity-phrase" },
+    { es: "romper las bolas", en: "to annoy (lit: to break the balls) (LatAm)", type: "profanity-phrase" },
+    { es: "romper los huevos", en: "to annoy (lit: to break the eggs) (LatAm)", type: "profanity-phrase" },
+    { es: "qué cabrón", en: "what a bastard (Spain/Mexico)", type: "profanity-phrase" },
+    { es: "qué putada", en: "what a bitch / what a shame (Spain)", type: "profanity-phrase" },
+    { es: "qué huevada", en: "what bullshit (LatAm)", type: "profanity-phrase" },
+    { es: "hablar pendejadas", en: "to talk bullshit (Mexico/LatAm)", type: "profanity-phrase" },
+    { es: "hablar gilipolleces", en: "to talk bullshit (Spain)", type: "profanity-phrase" },
+    { es: "hablar mierda", en: "to talk shit (Universal)", type: "profanity-phrase" },
+    { es: "hacerse una paja", en: "to jerk off (Universal)", type: "profanity-phrase" },
+    { es: "hacerse la puñeta", en: "to jerk off (Spain)", type: "profanity-phrase" },
+    { es: "chupar la verga", en: "to suck dick (LatAm)", type: "profanity-phrase" },
+    { es: "mamar la polla", en: "to suck dick (Spain)", type: "profanity-phrase" },
+    { es: "comer el coño", en: "to eat pussy (Spain)", type: "profanity-phrase" },
+    { es: "lamer la concha", en: "to eat pussy (LatAm)", type: "profanity-phrase" },
+    { es: "dar por el culo", en: "to fuck in the ass / annoy (Universal)", type: "profanity-phrase" },
+    { es: "romper el culo", en: "to tear a new one / fuck hard (Universal)", type: "profanity-phrase" },
+    { es: "abrir de piernas", en: "to spread legs (Universal)", type: "profanity-phrase" },
+    { es: "poner a cuatro patas", en: "to put on all fours / doggystyle (Spain)", type: "profanity-phrase" },
+    { es: "poner en cuatro", en: "to put on all fours (LatAm)", type: "profanity-phrase" },
+    { es: "echar un polvo", en: "to have a fuck / sex (Spain/LatAm)", type: "profanity-phrase" },
+    { es: "echar un palo", en: "to have a quick fuck (Caribbean/Venezuela)", type: "profanity-phrase" },
+    { es: "echar un kiki", en: "to have a quickie (Spain)", type: "profanity-phrase" },
+    { es: "mojar el churro", en: "to get laid (lit: to wet the churro) (Spain)", type: "profanity-phrase" },
+    { es: "meterla en caliente", en: "to stick it in hot (Universal)", type: "profanity-phrase" },
+    { es: "sacarla a tiempo", en: "to pull out in time (Universal)", type: "profanity-phrase" },
+    { es: "venirse adentro", en: "to cum inside (Universal)", type: "profanity-phrase" },
+    { es: "venirse afuera", en: "to cum outside (Universal)", type: "profanity-phrase" },
+    { es: "tragársela toda", en: "to swallow it all (Universal)", type: "profanity-phrase" },
+    { es: "escupirla", en: "to spit it out (Universal)", type: "profanity-phrase" },
+    { es: "tener los huevos de corbata", en: "to be terrified (lit: to have balls as a tie) (Spain)", type: "profanity-phrase" },
+    { es: "faltan huevos", en: "lacking balls / courage (Universal)", type: "profanity-phrase" },
+    { es: "tener un par de cojones", en: "to have a pair of balls / brave (Spain)", type: "profanity-phrase" },
+    { es: "con dos cojones", en: "with two balls / boldly (Spain)", type: "profanity-phrase" },
+    { es: "costar un huevo", en: "to cost an arm and a leg / balls (Universal)", type: "profanity-phrase" },
+    { es: "importar un huevo", en: "to not care at all (Spain)", type: "profanity-phrase" },
+    { es: "ser la polla", en: "to be the shit / awesome (Spain)", type: "profanity-phrase" },
+    { es: "ser una mierda", en: "to be shit / awful (Universal)", type: "profanity-phrase" },
+    { es: "hacer una cagada", en: "to make a huge mistake (Universal)", type: "profanity-phrase" },
+    { es: "cagar fuego", en: "to be in deep trouble / work extremely hard (Argentina)", type: "profanity-phrase" },
+    { es: "estar cagado de miedo", en: "to be shitting oneself with fear (Universal)", type: "profanity-phrase" },
+    { es: "estar meado por los perros", en: "to have terrible luck (lit: pissed on by dogs) (LatAm)", type: "profanity-phrase" },
+    { es: "mear fuera del tarro", en: "to be out of line (lit: piss outside the jar) (Argentina)", type: "profanity-phrase" },
+    { es: "salir a putear", en: "to go out looking for whores/trouble (LatAm)", type: "profanity-phrase" },
+    { es: "hacer una putada", en: "to play a dirty trick on someone (Spain)", type: "profanity-phrase" },
+    { es: "qué coño", en: "what the fuck (Spain/Caribbean)", type: "profanity-phrase" },
+    { es: "qué carajo", en: "what the hell (LatAm)", type: "profanity-phrase" },
+    { es: "qué mierda", en: "what the shit (Universal)", type: "profanity-phrase" },
+    { es: "ni de coña", en: "no fucking way (Spain)", type: "profanity-phrase" },
+    { es: "ni cagando", en: "no fucking way (LatAm)", type: "profanity-phrase" },
+    { es: "por la puta", en: "for fuck's sake (Universal)", type: "profanity-phrase" },
+    { es: "la concha de la lora", en: "goddamnit (lit: the parrot's cunt) (Argentina)", type: "profanity-phrase" },
+    { es: "a la verga", en: "oh shit / wow (Mexico)", type: "profanity-phrase" },
+    { es: "valer madre", en: "to be worthless / ruined (Mexico)", type: "profanity-phrase" },
+    { es: "chupar culo", en: "to kiss ass (Universal)", type: "profanity-phrase" },
+    { es: "ser un culiao", en: "to be a motherfucker (Chile)", type: "profanity-phrase" },
+    { es: "creerse la última chupada del mango", en: "to think you're the shit (LatAm)", type: "profanity-phrase" },
+    { es: "creerse la divina papaya", en: "to think you're the shit (Colombia)", type: "profanity-phrase" },
+    { es: "estar en pelotas", en: "to be stark naked (Universal)", type: "profanity-phrase" },
+    { es: "estar en cueros", en: "to be naked (LatAm)", type: "profanity-phrase" },
+    { es: "pillar en bragas", en: "to catch off guard (Spain)", type: "profanity-phrase" },
+    { es: "bajarse los pantalones", en: "to back down / surrender (Universal)", type: "profanity-phrase" },
+    { es: "poner los cuernos", en: "to cheat on (Universal)", type: "profanity-phrase" },
+    { es: "cantar el gallo", en: "to get a boner / voice cracking (LatAm)", type: "profanity-phrase" },
+    { es: "estar cachondo", en: "to be horny (Spain)", type: "profanity-phrase" },
+    { es: "estar arrecho", en: "to be horny / angry (LatAm)", type: "profanity-phrase" },
+    { es: "tirar los tejos", en: "to hit on someone (Spain)", type: "profanity-phrase" },
+    { es: "echar los perros", en: "to hit on someone (LatAm)", type: "profanity-phrase" },
+    { es: "pasarse por el forro de los cojones", en: "to completely ignore (Spain)", type: "profanity-phrase" },
+    { es: "tocar la zambomba", en: "to jerk off (Spain)", type: "profanity-phrase" },
+    { es: "sacudir la nutria", en: "to choke the chicken / masturbate (LatAm)", type: "profanity-phrase" },
+    { es: "ahogar el ganso", en: "to choke the chicken (LatAm)", type: "profanity-phrase" },
+    { es: "jugar al cinco contra uno", en: "to play 5 against 1 / masturbate (Universal)", type: "profanity-phrase" },
+
+   
+
+       ];
+
+        let currentDeck = [...allVocab];
+        let currentIndex = 0;
+
+        const cardElement = document.getElementById('flashcard');
+        const esWordElement = document.getElementById('es-word');
+        const enWordElement = document.getElementById('en-word');
+        const esTypeElement = document.getElementById('es-type');
+        const enTypeElement = document.getElementById('en-type');
+        const counterElement = document.getElementById('counter');
+
+        function updateCard() {
+            if (currentDeck.length === 0) {
+                esWordElement.textContent = "No cards";
+                enWordElement.textContent = "No cards";
+                esTypeElement.textContent = "";
+                enTypeElement.textContent = "";
+                counterElement.textContent = "0 / 0";
+                return;
+            }
+
+            cardElement.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                const card = currentDeck[currentIndex];
+                esWordElement.textContent = card.es;
+                enWordElement.textContent = card.en;
+                esTypeElement.textContent = card.type;
+                enTypeElement.textContent = card.type;
+                counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            if (currentDeck.length > 0) {
+                cardElement.classList.toggle('is-flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex + 1) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function filterCards() {
+            const filterValue = document.getElementById('typeFilter').value;
+            
+            if (filterValue === 'all') {
+                currentDeck = [...allVocab];
+            } else if (filterValue === 'clean') {
+                // Exclude any type starting with 'profanity-'
+                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
+            } else if (filterValue === 'profanity-only') {
+                // Include only types starting with 'profanity-'
+                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
+            } else {
+                // Filter by specific clean category (noun, verb, phrase)
+                currentDeck = allVocab.filter(word => word.type === filterValue);
+            }
+            
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function shuffleCards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
