@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Deck Template</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --warning-accent: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button, select {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--accent);
+            color: var(--white);
+            transition: background-color 0.3s ease;
+        }
+        button:hover, select:hover {
+            background-color: #2980b9;
+        }
+        .flashcard-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+        .word {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+        .type-badge {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .flashcard-back .type-badge {
+            background: rgba(255,255,255,0.2);
+        }
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vocabulary Deck Template</h1>
+    
+    <div class="controls">
+        <select id="typeFilter" onchange="filterCards()">
+            <option value="all">All Words (Includes Profanity)</option>
+            <option value="clean">Clean Deck (No Profanity)</option>
+            <option value="profanity-only">Profanity & Slang Only</option>
+            <option value="noun">Nouns Only (Clean)</option>
+            <option value="verb">Verbs Only (Clean)</option>
+            <option value="phrase">Phrases Only (Clean)</option>
+        </select>
+        <button onclick="shuffleCards()">Shuffle Deck</button>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+                <div class="word" id="es-word">Cargando...</div>
+                <div class="type-badge" id="es-type">...</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div class="word" id="en-word">Loading...</div>
+                <div class="type-badge" id="en-type">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button onclick="prevCard()">&#8592; Previous</button>
+        <div class="counter" id="counter">0 / 0</div>
+        <button onclick="nextCard()">Next &#8594;</button>
+    </div>
+
+    <script>
+        // Vocabulary Database
+        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
+        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        const allVocab = [
+    // --- NOUNS: Restaurants, Dining & Kitchen (150 Nouns) ---
+    // Restaurant & Front of House
+    { es: "el restaurante", en: "restaurant", type: "noun" },
+    { es: "el menú", en: "menu", type: "noun" },
+    { es: "la carta", en: "menu (physical booklet/card)", type: "noun" },
+    { es: "el camarero", en: "waiter (Spain)", type: "noun" },
+    { es: "el mesero", en: "waiter (LatAm)", type: "noun" },
+    { es: "la camarera", en: "waitress (Spain)", type: "noun" },
+    { es: "la mesera", en: "waitress (LatAm)", type: "noun" },
+    { es: "el chef", en: "chef", type: "noun" },
+    { es: "el cocinero", en: "cook (male)", type: "noun" },
+    { es: "la cocinera", en: "cook (female)", type: "noun" },
+    { es: "el comensal", en: "diner / dinner guest", type: "noun" },
+    { es: "la cuenta", en: "the bill / check", type: "noun" },
+    { es: "la propina", en: "tip / gratuity", type: "noun" },
+    { es: "la reservación", en: "reservation", type: "noun" },
+    { es: "la mesa", en: "table", type: "noun" },
+    { es: "la silla", en: "chair", type: "noun" },
+    { es: "el mantel", en: "tablecloth", type: "noun" },
+    { es: "la servilleta", en: "napkin", type: "noun" },
+    { es: "el plato", en: "plate / dish", type: "noun" },
+    { es: "el vaso", en: "glass (for water/juice)", type: "noun" },
+    { es: "la copa", en: "wine glass", type: "noun" },
+    { es: "la taza", en: "cup / mug", type: "noun" },
+    { es: "el cubierto", en: "piece of cutlery", type: "noun" },
+    { es: "el tenedor", en: "fork", type: "noun" },
+    { es: "el cuchillo", en: "knife", type: "noun" },
+    { es: "la cuchara", en: "spoon", type: "noun" },
+    { es: "la cucharita", en: "teaspoon", type: "noun" },
+    { es: "el platillo", en: "saucer / small dish", type: "noun" },
+    { es: "la entrada", en: "appetizer / starter", type: "noun" },
+    { es: "el aperitivo", en: "aperitif / appetizer", type: "noun" },
+    { es: "el entremés", en: "hors d'oeuvre", type: "noun" },
+    { es: "el plato principal", en: "main course", type: "noun" },
+    { es: "la especialidad", en: "specialty", type: "noun" },
+    { es: "la bebida", en: "beverage", type: "noun" },
+    { es: "la barra", en: "bar / counter", type: "noun" },
+    { es: "la cantina", en: "canteen / bar", type: "noun" },
+    { es: "la taberna", en: "tavern", type: "noun" },
+    { es: "el mesón", en: "inn / traditional restaurant", type: "noun" },
+    { es: "el bistró", en: "bistro", type: "noun" },
+    { es: "el bufé", en: "buffet", type: "noun" },
+
+    // Kitchen & Appliances (Back of House)
+    { es: "la cocina", en: "kitchen", type: "noun" },
+    { es: "la estufa", en: "stove", type: "noun" },
+    { es: "el horno", en: "oven", type: "noun" },
+    { es: "el microondas", en: "microwave", type: "noun" },
+    { es: "el refrigerador", en: "refrigerator", type: "noun" },
+    { es: "la nevera", en: "fridge", type: "noun" },
+    { es: "el congelador", en: "freezer", type: "noun" },
+    { es: "el lavaplatos", en: "dishwasher", type: "noun" },
+    { es: "el lavavajillas", en: "dishwasher (Spain)", type: "noun" },
+    { es: "la olla", en: "pot", type: "noun" },
+    { es: "la sartén", en: "frying pan", type: "noun" },
+    { es: "la cazuela", en: "casserole dish", type: "noun" },
+    { es: "la cacerola", en: "saucepan", type: "noun" },
+    { es: "el cazo", en: "ladle / small pot", type: "noun" },
+    { es: "la tabla de cortar", en: "cutting board", type: "noun" },
+    { es: "el cucharón", en: "ladle", type: "noun" },
+    { es: "la espátula", en: "spatula", type: "noun" },
+    { es: "el batidor", en: "whisk", type: "noun" },
+    { es: "la batidora", en: "mixer", type: "noun" },
+    { es: "la licuadora", en: "blender", type: "noun" },
+    { es: "la tostadora", en: "toaster", type: "noun" },
+    { es: "la cafetera", en: "coffee maker", type: "noun" },
+    { es: "el colador", en: "strainer / colander", type: "noun" },
+    { es: "el rallador", en: "grater", type: "noun" },
+    { es: "el pelador", en: "peeler", type: "noun" },
+    { es: "el exprimidor", en: "juicer", type: "noun" },
+    { es: "el sacacorchos", en: "corkscrew", type: "noun" },
+    { es: "el abrelatas", en: "can opener", type: "noun" },
+    { es: "el rodillo", en: "rolling pin", type: "noun" },
+    { es: "el delantal", en: "apron", type: "noun" },
+    { es: "el fregadero", en: "kitchen sink", type: "noun" },
+    { es: "la despensa", en: "pantry", type: "noun" },
+    { es: "la encimera", en: "countertop", type: "noun" },
+    
+    // Meals, Diet & Nutrition
+    { es: "el desayuno", en: "breakfast", type: "noun" },
+    { es: "el almuerzo", en: "lunch", type: "noun" },
+    { es: "la comida", en: "lunch (Spain) / food", type: "noun" },
+    { es: "la cena", en: "dinner", type: "noun" },
+    { es: "el banquete", en: "banquet / feast", type: "noun" },
+    { es: "el apetito", en: "appetite", type: "noun" },
+    { es: "el hambre", en: "hunger (f. noun, uses 'el')", type: "noun" },
+    { es: "la sed", en: "thirst", type: "noun" },
+    { es: "el sabor", en: "flavor / taste", type: "noun" },
+    { es: "el aroma", en: "aroma", type: "noun" },
+    { es: "el olor", en: "smell / odor", type: "noun" },
+    { es: "la receta", en: "recipe", type: "noun" },
+    { es: "el ingrediente", en: "ingredient", type: "noun" },
+    { es: "la porción", en: "portion", type: "noun" },
+    { es: "la ración", en: "ration / serving", type: "noun" },
+    { es: "el bocado", en: "bite / mouthful", type: "noun" },
+    { es: "el trozo", en: "piece / chunk", type: "noun" },
+    { es: "el pedazo", en: "piece / slice", type: "noun" },
+    { es: "la rebanada", en: "slice", type: "noun" },
+    { es: "la miga", en: "crumb", type: "noun" },
+    { es: "la corteza", en: "crust", type: "noun" },
+    { es: "el hueso", en: "bone", type: "noun" },
+    { es: "la espina", en: "fishbone / spine", type: "noun" },
+    { es: "la grasa", en: "fat / grease", type: "noun" },
+    { es: "la caloría", en: "calorie", type: "noun" },
+    { es: "la dieta", en: "diet", type: "noun" },
+    { es: "la nutrición", en: "nutrition", type: "noun" },
+    { es: "el carbohidrato", en: "carbohydrate", type: "noun" },
+    { es: "la proteína", en: "protein", type: "noun" },
+    { es: "la vitamina", en: "vitamin", type: "noun" },
+    { es: "la digestión", en: "digestion", type: "noun" },
+    { es: "el empacho", en: "indigestion", type: "noun" },
+    { es: "la alergia", en: "allergy", type: "noun" },
+    { es: "el festín", en: "feast", type: "noun" },
+    { es: "la gastronomía", en: "gastronomy", type: "noun" },
+    
+    // Dishes, Preparations & Serving Items
+    { es: "la jarra", en: "pitcher / jug", type: "noun" },
+    { es: "el sándwich", en: "sandwich", type: "noun" },
+    { es: "el bocadillo", en: "sandwich (Spain)", type: "noun" },
+    { es: "la hamburguesa", en: "hamburger", type: "noun" },
+    { es: "la pizza", en: "pizza", type: "noun" },
+    { es: "la ensalada", en: "salad", type: "noun" },
+    { es: "el puré", en: "puree / mashed potatoes", type: "noun" },
+    { es: "el guiso", en: "stew", type: "noun" },
+    { es: "el estofado", en: "braised meat / stew", type: "noun" },
+    { es: "la parrillada", en: "mixed grill", type: "noun" },
+    { es: "el asado", en: "barbecue / roast", type: "noun" },
+    { es: "la barbacoa", en: "barbecue", type: "noun" },
+    { es: "el aderezo", en: "dressing", type: "noun" },
+    { es: "la vinagreta", en: "vinaigrette", type: "noun" },
+    { es: "la guarnición", en: "side dish", type: "noun" },
+    { es: "el acompañamiento", en: "side dish / accompaniment", type: "noun" },
+    { es: "el almíbar", en: "syrup", type: "noun" },
+    { es: "el turrón", en: "nougat", type: "noun" },
+    { es: "el flan", en: "flan / creme caramel", type: "noun" },
+    { es: "el pudín", en: "pudding", type: "noun" },
+    { es: "la tarta", en: "tart / pie / cake", type: "noun" },
+    { es: "la empanada", en: "empanada / turnover", type: "noun" },
+    { es: "el taco", en: "taco", type: "noun" },
+    { es: "el burrito", en: "burrito", type: "noun" },
+    { es: "el sushi", en: "sushi", type: "noun" },
+    { es: "el ceviche", en: "ceviche", type: "noun" },
+    { es: "la paella", en: "paella", type: "noun" },
+    { es: "la tortilla de patatas", en: "Spanish omelet", type: "noun" },
+    { es: "el gazpacho", en: "gazpacho (cold soup)", type: "noun" },
+    { es: "la croqueta", en: "croquette", type: "noun" },
+    { es: "la aceituna", en: "olive", type: "noun" },
+    { es: "la tapa", en: "tapa / appetizer (Spain)", type: "noun" },
+    { es: "el pincho", en: "skewer / appetizer", type: "noun" },
+    { es: "el montadito", en: "small sandwich / tapa", type: "noun" },
+    { es: "la degustación", en: "tasting", type: "noun" },
+    { es: "el maridaje", en: "pairing (wine and food)", type: "noun" },
+    { es: "el sumiller", en: "sommelier", type: "noun" },
+    { es: "el cóctel", en: "cocktail", type: "noun" },
+    { es: "el hielo", en: "ice", type: "noun" },
+    { es: "la pajita", en: "straw (Spain)", type: "noun" },
+    { es: "el popote", en: "straw (Mexico)", type: "noun" },
+    { es: "la botella", en: "bottle", type: "noun" },
+
+    // --- VERBS: Dining, Preparing & Cooking Techniques (50 Verbs) ---
+    { es: "desayunar", en: "to have breakfast", type: "verb" },
+    { es: "almorzar", en: "to have lunch", type: "verb" },
+    { es: "cenar", en: "to have dinner", type: "verb" },
+    { es: "merendar", en: "to have a snack", type: "verb" },
+    { es: "pedir", en: "to order / to ask for", type: "verb" },
+    { es: "ordenar", en: "to order (food)", type: "verb" },
+    { es: "servir", en: "to serve", type: "verb" },
+    { es: "saborear", en: "to savor", type: "verb" },
+    { es: "degustar", en: "to taste / to sample", type: "verb" },
+    { es: "tragar", en: "to swallow", type: "verb" },
+    { es: "masticar", en: "to chew", type: "verb" },
+    { es: "morder", en: "to bite", type: "verb" },
+    { es: "digerir", en: "to digest", type: "verb" },
+    { es: "alimentar", en: "to feed", type: "verb" },
+    { es: "nutrir", en: "to nourish", type: "verb" },
+    { es: "saciar", en: "to satiate", type: "verb" },
+    { es: "brindar", en: "to toast (cheers)", type: "verb" },
+    { es: "invitar", en: "to invite / to treat (pay for)", type: "verb" },
+    { es: "mezclar", en: "to mix", type: "verb" },
+    { es: "batir", en: "to beat / to whisk", type: "verb" },
+    { es: "revolver", en: "to stir", type: "verb" },
+    { es: "remover", en: "to stir / to remove", type: "verb" },
+    { es: "licuar", en: "to blend / to liquefy", type: "verb" },
+    { es: "amasar", en: "to knead", type: "verb" },
+    { es: "sazonar", en: "to season", type: "verb" },
+    { es: "condimentar", en: "to flavor / to season", type: "verb" },
+    { es: "aderezar", en: "to dress (a salad)", type: "verb" },
+    { es: "salar", en: "to salt", type: "verb" },
+    { es: "salpimentar", en: "to season with salt and pepper", type: "verb" },
+    { es: "endulzar", en: "to sweeten", type: "verb" },
+    { es: "exprimir", en: "to squeeze", type: "verb" },
+    { es: "rallar", en: "to grate", type: "verb" },
+    { es: "escurrir", en: "to drain", type: "verb" },
+    { es: "colar", en: "to strain", type: "verb" },
+    { es: "untar", en: "to spread", type: "verb" },
+    { es: "derretir", en: "to melt", type: "verb" },
+    { es: "fundir", en: "to melt (cheese/chocolate)", type: "verb" },
+    { es: "congelar", en: "to freeze", type: "verb" },
+    { es: "descongelar", en: "to thaw / to defrost", type: "verb" },
+    { es: "enfriar", en: "to cool / to chill", type: "verb" },
+    { es: "calentar", en: "to heat", type: "verb" },
+    { es: "recalentar", en: "to reheat", type: "verb" },
+    { es: "cocer", en: "to cook / to boil", type: "verb" },
+    { es: "guisar", en: "to stew", type: "verb" },
+    { es: "dorar", en: "to brown", type: "verb" },
+    { es: "saltear", en: "to sauté", type: "verb" },
+    { es: "marinar", en: "to marinate", type: "verb" },
+    { es: "remojar", en: "to soak", type: "verb" },
+    { es: "empanar", en: "to bread", type: "verb" },
+    { es: "rebozar", en: "to batter / to coat", type: "verb" },
+
+
+       ];
+
+        let currentDeck = [...allVocab];
+        let currentIndex = 0;
+
+        const cardElement = document.getElementById('flashcard');
+        const esWordElement = document.getElementById('es-word');
+        const enWordElement = document.getElementById('en-word');
+        const esTypeElement = document.getElementById('es-type');
+        const enTypeElement = document.getElementById('en-type');
+        const counterElement = document.getElementById('counter');
+
+        function updateCard() {
+            if (currentDeck.length === 0) {
+                esWordElement.textContent = "No cards";
+                enWordElement.textContent = "No cards";
+                esTypeElement.textContent = "";
+                enTypeElement.textContent = "";
+                counterElement.textContent = "0 / 0";
+                return;
+            }
+
+            cardElement.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                const card = currentDeck[currentIndex];
+                esWordElement.textContent = card.es;
+                enWordElement.textContent = card.en;
+                esTypeElement.textContent = card.type;
+                enTypeElement.textContent = card.type;
+                counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            if (currentDeck.length > 0) {
+                cardElement.classList.toggle('is-flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex + 1) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function filterCards() {
+            const filterValue = document.getElementById('typeFilter').value;
+            
+            if (filterValue === 'all') {
+                currentDeck = [...allVocab];
+            } else if (filterValue === 'clean') {
+                // Exclude any type starting with 'profanity-'
+                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
+            } else if (filterValue === 'profanity-only') {
+                // Include only types starting with 'profanity-'
+                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
+            } else {
+                // Filter by specific clean category (noun, verb, phrase)
+                currentDeck = allVocab.filter(word => word.type === filterValue);
+            }
+            
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function shuffleCards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
