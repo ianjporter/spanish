@@ -12,3 +12,4 @@
 ## [Clothes Hygiene Kids Deck](clothes-hygiene-kids.html)
 ## [Health and Nutrition Deck](health.html)
 ## [Culture and Society Deck](culture-society.html)
+## [School Deck](school.html)
