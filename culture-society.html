@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Deck Template</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --warning-accent: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button, select {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--accent);
+            color: var(--white);
+            transition: background-color 0.3s ease;
+        }
+        button:hover, select:hover {
+            background-color: #2980b9;
+        }
+        .flashcard-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+        .word {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+        .type-badge {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .flashcard-back .type-badge {
+            background: rgba(255,255,255,0.2);
+        }
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vocabulary Deck Template</h1>
+    
+    <div class="controls">
+        <select id="typeFilter" onchange="filterCards()">
+            <option value="all">All Words (Includes Profanity)</option>
+            <option value="clean">Clean Deck (No Profanity)</option>
+            <option value="profanity-only">Profanity & Slang Only</option>
+            <option value="noun">Nouns Only (Clean)</option>
+            <option value="verb">Verbs Only (Clean)</option>
+            <option value="phrase">Phrases Only (Clean)</option>
+        </select>
+        <button onclick="shuffleCards()">Shuffle Deck</button>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+                <div class="word" id="es-word">Cargando...</div>
+                <div class="type-badge" id="es-type">...</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div class="word" id="en-word">Loading...</div>
+                <div class="type-badge" id="en-type">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button onclick="prevCard()">&#8592; Previous</button>
+        <div class="counter" id="counter">0 / 0</div>
+        <button onclick="nextCard()">Next &#8594;</button>
+    </div>
+
+    <script>
+        // Vocabulary Database
+        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
+        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        const allVocab = [
+           
+/ --- NOUNS: Culture & Society (150 Nouns) ---
+    // Society, Identity & Values
+    { es: "la cultura", en: "culture", type: "noun" },
+    { es: "la sociedad", en: "society", type: "noun" },
+    { es: "la tradición", en: "tradition", type: "noun" },
+    { es: "la costumbre", en: "custom / habit", type: "noun" },
+    { es: "la comunidad", en: "community", type: "noun" },
+    { es: "el idioma", en: "language", type: "noun" },
+    { es: "la lengua", en: "language / tongue", type: "noun" },
+    { es: "el dialecto", en: "dialect", type: "noun" },
+    { es: "el acento", en: "accent", type: "noun" },
+    { es: "la identidad", en: "identity", type: "noun" },
+    { es: "el patrimonio", en: "heritage (cultural/historical)", type: "noun" },
+    { es: "la herencia", en: "inheritance / heritage", type: "noun" },
+    { es: "el valor", en: "value / courage", type: "noun" },
+    { es: "la moral", en: "morals / morality", type: "noun" },
+    { es: "la ética", en: "ethics", type: "noun" },
+    { es: "la diversidad", en: "diversity", type: "noun" },
+    { es: "la igualdad", en: "equality", type: "noun" },
+    { es: "la equidad", en: "equity / fairness", type: "noun" },
+    { es: "el racismo", en: "racism", type: "noun" },
+    { es: "la discriminación", en: "discrimination", type: "noun" },
+    { es: "el prejuicio", en: "prejudice", type: "noun" },
+    { es: "el estereotipo", en: "stereotype", type: "noun" },
+    { es: "el género", en: "gender", type: "noun" },
+    { es: "la clase", en: "class (social)", type: "noun" },
+    { es: "la pobreza", en: "poverty", type: "noun" },
+    { es: "la riqueza", en: "wealth", type: "noun" },
+    { es: "el bienestar", en: "well-being / welfare", type: "noun" },
+    { es: "la salud", en: "health", type: "noun" },
+    { es: "la educación", en: "education", type: "noun" },
+    { es: "el progreso", en: "progress", type: "noun" },
+    { es: "el festival", en: "festival", type: "noun" },
+    { es: "la fiesta", en: "party / holiday", type: "noun" },
+    { es: "el carnaval", en: "carnival", type: "noun" },
+    { es: "el desfile", en: "parade", type: "noun" },
+    { es: "la ceremonia", en: "ceremony", type: "noun" },
+    { es: "el ritual", en: "ritual", type: "noun" },
+    { es: "la moda", en: "fashion", type: "noun" },
+    { es: "el estilo", en: "style", type: "noun" },
+    { es: "la tendencia", en: "trend", type: "noun" },
+    { es: "la belleza", en: "beauty", type: "noun" },
+    { es: "la estética", en: "aesthetics", type: "noun" },
+    { es: "la familia", en: "family", type: "noun" },
+    { es: "el matrimonio", en: "marriage", type: "noun" },
+    { es: "el divorcio", en: "divorce", type: "noun" },
+    { es: "la generación", en: "generation", type: "noun" },
+
+    // Politics, Government & Law
+    { es: "la política", en: "politics / policy", type: "noun" },
+    { es: "el gobierno", en: "government", type: "noun" },
+    { es: "la democracia", en: "democracy", type: "noun" },
+    { es: "la república", en: "republic", type: "noun" },
+    { es: "la dictadura", en: "dictatorship", type: "noun" },
+    { es: "la ley", en: "law", type: "noun" },
+    { es: "el derecho", en: "right (legal/human) / law", type: "noun" },
+    { es: "el ciudadano", en: "citizen (male)", type: "noun" },
+    { es: "la ciudadana", en: "citizen (female)", type: "noun" },
+    { es: "la población", en: "population", type: "noun" },
+    { es: "el pueblo", en: "the people / town", type: "noun" },
+    { es: "la nación", en: "nation", type: "noun" },
+    { es: "el país", en: "country", type: "noun" },
+    { es: "el estado", en: "state", type: "noun" },
+    { es: "la frontera", en: "border", type: "noun" },
+    { es: "la paz", en: "peace", type: "noun" },
+    { es: "la guerra", en: "war", type: "noun" },
+    { es: "el conflicto", en: "conflict", type: "noun" },
+    { es: "la revolución", en: "revolution", type: "noun" },
+    { es: "la manifestación", en: "demonstration / protest", type: "noun" },
+    { es: "la huelga", en: "strike (labor)", type: "noun" },
+    { es: "el voto", en: "vote", type: "noun" },
+    { es: "la elección", en: "election", type: "noun" },
+    { es: "el candidato", en: "candidate", type: "noun" },
+    { es: "la campaña", en: "campaign", type: "noun" },
+    { es: "el presidente", en: "president", type: "noun" },
+    { es: "el rey", en: "king", type: "noun" },
+    { es: "la reina", en: "queen", type: "noun" },
+    { es: "el líder", en: "leader", type: "noun" },
+    { es: "el representante", en: "representative", type: "noun" },
+    { es: "la justicia", en: "justice", type: "noun" },
+    { es: "la injusticia", en: "injustice", type: "noun" },
+    { es: "la libertad", en: "freedom / liberty", type: "noun" },
+    { es: "la opresión", en: "oppression", type: "noun" },
+    { es: "el poder", en: "power", type: "noun" },
+
+    // Arts, Media & Entertainment
+    { es: "el arte", en: "art", type: "noun" },
+    { es: "la música", en: "music", type: "noun" },
+    { es: "la literatura", en: "literature", type: "noun" },
+    { es: "la historia", en: "history", type: "noun" },
+    { es: "la poesía", en: "poetry", type: "noun" },
+    { es: "la novela", en: "novel", type: "noun" },
+    { es: "el teatro", en: "theater", type: "noun" },
+    { es: "la danza", en: "dance (art form)", type: "noun" },
+    { es: "el baile", en: "dance (event/action)", type: "noun" },
+    { es: "el cine", en: "cinema", type: "noun" },
+    { es: "la película", en: "movie / film", type: "noun" },
+    { es: "la pintura", en: "painting (artwork/paint)", type: "noun" },
+    { es: "la escultura", en: "sculpture", type: "noun" },
+    { es: "la arquitectura", en: "architecture", type: "noun" },
+    { es: "el museo", en: "museum", type: "noun" },
+    { es: "la galería", en: "gallery", type: "noun" },
+    { es: "la exposición", en: "exhibition / show", type: "noun" },
+    { es: "el artista", en: "artist", type: "noun" },
+    { es: "el escritor", en: "writer", type: "noun" },
+    { es: "el músico", en: "musician", type: "noun" },
+    { es: "el actor", en: "actor", type: "noun" },
+    { es: "la actriz", en: "actress", type: "noun" },
+    { es: "el director", en: "director", type: "noun" },
+    { es: "el público", en: "audience / public", type: "noun" },
+    { es: "el espectador", en: "spectator / viewer", type: "noun" },
+    { es: "el escenario", en: "stage / scenery", type: "noun" },
+    { es: "el concierto", en: "concert", type: "noun" },
+    { es: "la canción", en: "song", type: "noun" },
+    { es: "el ritmo", en: "rhythm", type: "noun" },
+    { es: "la melodía", en: "melody", type: "noun" },
+    { es: "el instrumento", en: "instrument", type: "noun" },
+    { es: "la prensa", en: "press / media", type: "noun" },
+    { es: "el periodismo", en: "journalism", type: "noun" },
+    { es: "la noticia", en: "news (piece of news)", type: "noun" },
+    { es: "el artículo", en: "article", type: "noun" },
+    { es: "el titular", en: "headline", type: "noun" },
+    { es: "la entrevista", en: "interview", type: "noun" },
+    { es: "el reportaje", en: "report / documentary", type: "noun" },
+    { es: "la revista", en: "magazine", type: "noun" },
+    { es: "la televisión", en: "television", type: "noun" },
+    { es: "la radio", en: "radio", type: "noun" },
+    { es: "el programa", en: "program / show", type: "noun" },
+    { es: "el canal", en: "channel", type: "noun" },
+    { es: "el anuncio", en: "commercial / advertisement", type: "noun" },
+    { es: "la publicidad", en: "advertising", type: "noun" },
+
+    // Religion, Beliefs & Life Stages
+    { es: "la juventud", en: "youth", type: "noun" },
+    { es: "la vejez", en: "old age", type: "noun" },
+    { es: "la infancia", en: "childhood", type: "noun" },
+    { es: "el nacimiento", en: "birth", type: "noun" },
+    { es: "la muerte", en: "death", type: "noun" },
+    { es: "el funeral", en: "funeral", type: "noun" },
+    { es: "el cementerio", en: "cemetery", type: "noun" },
+    { es: "la religión", en: "religion", type: "noun" },
+    { es: "la creencia", en: "belief", type: "noun" },
+    { es: "el mito", en: "myth", type: "noun" },
+    { es: "la leyenda", en: "legend", type: "noun" },
+    { es: "el dios", en: "god", type: "noun" },
+    { es: "la diosa", en: "goddess", type: "noun" },
+    { es: "el templo", en: "temple", type: "noun" },
+    { es: "la iglesia", en: "church", type: "noun" },
+    { es: "la mezquita", en: "mosque", type: "noun" },
+    { es: "la sinagoga", en: "synagogue", type: "noun" },
+    { es: "el sacerdote", en: "priest", type: "noun" },
+    { es: "el pastor", en: "pastor", type: "noun" },
+    { es: "el monje", en: "monk", type: "noun" },
+    { es: "el pecado", en: "sin", type: "noun" },
+    { es: "la virtud", en: "virtue", type: "noun" },
+    { es: "el alma", en: "soul", type: "noun" },
+    { es: "el espíritu", en: "spirit", type: "noun" },
+    { es: "la fe", en: "faith", type: "noun" },
+
+    // --- VERBS: Culture, Expression & Governance (50 Verbs) ---
+    { es: "creer", en: "to believe", type: "verb" },
+    { es: "pensar", en: "to think", type: "verb" },
+    { es: "expresar", en: "to express", type: "verb" },
+    { es: "compartir", en: "to share", type: "verb" },
+    { es: "celebrar", en: "to celebrate", type: "verb" },
+    { es: "festejar", en: "to party / to celebrate", type: "verb" },
+    { es: "participar", en: "to participate", type: "verb" },
+    { es: "organizar", en: "to organize", type: "verb" },
+    { es: "gobernar", en: "to govern", type: "verb" },
+    { es: "postularse", en: "to run for office", type: "verb" },
+    { es: "discutir", en: "to discuss / to argue", type: "verb" },
+    { es: "protestar", en: "to protest", type: "verb" },
+    { es: "luchar", en: "to fight / to struggle", type: "verb" },
+    { es: "defender", en: "to defend", type: "verb" },
+    { es: "proteger", en: "to protect", type: "verb" },
+    { es: "atacar", en: "to attack", type: "verb" },
+    { es: "oprimir", en: "to oppress", type: "verb" },
+    { es: "liberar", en: "to liberate / to free", type: "verb" },
+    { es: "discriminar", en: "to discriminate", type: "verb" },
+    { es: "tolerar", en: "to tolerate", type: "verb" },
+    { es: "respetar", en: "to respect", type: "verb" },
+    { es: "aceptar", en: "to accept", type: "verb" },
+    { es: "rechazar", en: "to reject", type: "verb" },
+    { es: "adaptar", en: "to adapt", type: "verb" },
+    { es: "asimilar", en: "to assimilate", type: "verb" },
+    { es: "heredar", en: "to inherit", type: "verb" },
+    { es: "conservar", en: "to conserve / to keep", type: "verb" },
+    { es: "transformar", en: "to transform", type: "verb" },
+    { es: "mejorar", en: "to improve", type: "verb" },
+    { es: "empeorar", en: "to worsen", type: "verb" },
+    { es: "desarrollar", en: "to develop", type: "verb" },
+    { es: "progresar", en: "to progress", type: "verb" },
+    { es: "crear", en: "to create", type: "verb" },
+    { es: "inventar", en: "to invent", type: "verb" },
+    { es: "diseñar", en: "to design", type: "verb" },
+    { es: "pintar", en: "to paint", type: "verb" },
+    { es: "esculpir", en: "to sculpt", type: "verb" },
+    { es: "cantar", en: "to sing", type: "verb" },
+    { es: "bailar", en: "to dance", type: "verb" },
+    { es: "tocar", en: "to play (an instrument) / to touch", type: "verb" },
+    { es: "actuar", en: "to act", type: "verb" },
+    { es: "dirigir", en: "to direct", type: "verb" },
+    { es: "publicar", en: "to publish", type: "verb" },
+    { es: "informar", en: "to inform / to report", type: "verb" },
+    { es: "comunicar", en: "to communicate", type: "verb" },
+    { es: "entrevistar", en: "to interview", type: "verb" },
+    { es: "rezar", en: "to pray", type: "verb" },
+    { es: "adorar", en: "to worship / to adore", type: "verb" },
+    { es: "influir", en: "to influence", type: "verb" },
+    { es: "dominar", en: "to dominate", type: "verb" },
+
+      
+
+       ];
+
+        let currentDeck = [...allVocab];
+        let currentIndex = 0;
+
+        const cardElement = document.getElementById('flashcard');
+        const esWordElement = document.getElementById('es-word');
+        const enWordElement = document.getElementById('en-word');
+        const esTypeElement = document.getElementById('es-type');
+        const enTypeElement = document.getElementById('en-type');
+        const counterElement = document.getElementById('counter');
+
+        function updateCard() {
+            if (currentDeck.length === 0) {
+                esWordElement.textContent = "No cards";
+                enWordElement.textContent = "No cards";
+                esTypeElement.textContent = "";
+                enTypeElement.textContent = "";
+                counterElement.textContent = "0 / 0";
+                return;
+            }
+
+            cardElement.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                const card = currentDeck[currentIndex];
+                esWordElement.textContent = card.es;
+                enWordElement.textContent = card.en;
+                esTypeElement.textContent = card.type;
+                enTypeElement.textContent = card.type;
+                counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            if (currentDeck.length > 0) {
+                cardElement.classList.toggle('is-flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex + 1) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function filterCards() {
+            const filterValue = document.getElementById('typeFilter').value;
+            
+            if (filterValue === 'all') {
+                currentDeck = [...allVocab];
+            } else if (filterValue === 'clean') {
+                // Exclude any type starting with 'profanity-'
+                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
+            } else if (filterValue === 'profanity-only') {
+                // Include only types starting with 'profanity-'
+                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
+            } else {
+                // Filter by specific clean category (noun, verb, phrase)
+                currentDeck = allVocab.filter(word => word.type === filterValue);
+            }
+            
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function shuffleCards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
+
