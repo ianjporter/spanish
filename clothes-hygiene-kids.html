@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Deck Template</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --warning-accent: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button, select {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--accent);
+            color: var(--white);
+            transition: background-color 0.3s ease;
+        }
+        button:hover, select:hover {
+            background-color: #2980b9;
+        }
+        .flashcard-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+        .word {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+        .type-badge {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .flashcard-back .type-badge {
+            background: rgba(255,255,255,0.2);
+        }
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vocabulary Deck Template</h1>
+    
+    <div class="controls">
+        <select id="typeFilter" onchange="filterCards()">
+            <option value="all">All Words (Includes Profanity)</option>
+            <option value="clean">Clean Deck (No Profanity)</option>
+            <option value="profanity-only">Profanity & Slang Only</option>
+            <option value="noun">Nouns Only (Clean)</option>
+            <option value="verb">Verbs Only (Clean)</option>
+            <option value="phrase">Phrases Only (Clean)</option>
+        </select>
+        <button onclick="shuffleCards()">Shuffle Deck</button>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+                <div class="word" id="es-word">Cargando...</div>
+                <div class="type-badge" id="es-type">...</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div class="word" id="en-word">Loading...</div>
+                <div class="type-badge" id="en-type">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button onclick="prevCard()">&#8592; Previous</button>
+        <div class="counter" id="counter">0 / 0</div>
+        <button onclick="nextCard()">Next &#8594;</button>
+    </div>
+
+    <script>
+        // Vocabulary Database
+        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
+        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        const allVocab = [
+// --- NOUNS: Time, Routines, Hygiene & Courtesy (150 Nouns) ---
+    // Time, Days & Routine
+    { es: "el día", en: "day", type: "noun" },
+    { es: "la noche", en: "night", type: "noun" },
+    { es: "la mañana", en: "morning", type: "noun" },
+    { es: "la tarde", en: "afternoon / evening", type: "noun" },
+    { es: "la madrugada", en: "early morning / dawn", type: "noun" },
+    { es: "el mediodía", en: "noon", type: "noun" },
+    { es: "la medianoche", en: "midnight", type: "noun" },
+    { es: "el minuto", en: "minute", type: "noun" },
+    { es: "el segundo", en: "second (time)", type: "noun" },
+    { es: "la hora", en: "hour", type: "noun" },
+    { es: "la semana", en: "week", type: "noun" },
+    { es: "el mes", en: "month", type: "noun" },
+    { es: "el año", en: "year", type: "noun" },
+    { es: "la fecha", en: "date (calendar)", type: "noun" },
+    { es: "la rutina", en: "routine", type: "noun" },
+    { es: "el hábito", en: "habit", type: "noun" },
+    { es: "la puntualidad", en: "punctuality", type: "noun" },
+    { es: "el reloj", en: "clock / watch", type: "noun" },
+    { es: "la alarma", en: "alarm", type: "noun" },
+    { es: "el despertador", en: "alarm clock", type: "noun" },
+    
+    // Sleep & Rest
+    { es: "el sueño", en: "sleep / dream", type: "noun" },
+    { es: "la pesadilla", en: "nightmare", type: "noun" },
+    { es: "la siesta", en: "nap", type: "noun" },
+    { es: "el insomnio", en: "insomnia", type: "noun" },
+    { es: "el bostezo", en: "yawn", type: "noun" },
+    { es: "el ronquido", en: "snore", type: "noun" },
+    { es: "la cama", en: "bed", type: "noun" },
+    { es: "el colchón", en: "mattress", type: "noun" },
+    { es: "la almohada", en: "pillow", type: "noun" },
+    { es: "la sábana", en: "sheet (bedding)", type: "noun" },
+    { es: "la cobija", en: "blanket (LatAm)", type: "noun" },
+    { es: "la manta", en: "blanket (Spain)", type: "noun" },
+
+    // Hygiene & Personal Care Items
+    { es: "el jabón", en: "soap", type: "noun" },
+    { es: "el champú", en: "shampoo", type: "noun" },
+    { es: "el acondicionador", en: "conditioner", type: "noun" },
+    { es: "la toalla", en: "towel", type: "noun" },
+    { es: "el paño", en: "washcloth", type: "noun" },
+    { es: "la esponja", en: "sponge", type: "noun" },
+    { es: "el cepillo", en: "brush", type: "noun" },
+    { es: "la pasta dental", en: "toothpaste", type: "noun" },
+    { es: "el dentífrico", en: "toothpaste (formal)", type: "noun" },
+    { es: "el hilo dental", en: "dental floss", type: "noun" },
+    { es: "el enjuague", en: "mouthwash / rinse", type: "noun" },
+    { es: "el peine", en: "comb", type: "noun" },
+    { es: "el desodorante", en: "deodorant", type: "noun" },
+    { es: "el perfume", en: "perfume", type: "noun" },
+    { es: "la colonia", en: "cologne", type: "noun" },
+    { es: "la loción", en: "lotion", type: "noun" },
+    { es: "la crema hidratante", en: "moisturizer", type: "noun" },
+    { es: "el maquillaje", en: "makeup", type: "noun" },
+    { es: "el pintalabios", en: "lipstick", type: "noun" },
+    { es: "el rímel", en: "mascara", type: "noun" },
+    { es: "el esmalte", en: "nail polish", type: "noun" },
+    { es: "la pinza", en: "tweezers", type: "noun" },
+    { es: "el secador", en: "hair dryer", type: "noun" },
+    { es: "la plancha de pelo", en: "hair straightener", type: "noun" },
+    { es: "la navaja", en: "razor (straight/blade)", type: "noun" },
+    { es: "la maquinilla", en: "razor (disposable/electric)", type: "noun" },
+    { es: "el papel higiénico", en: "toilet paper", type: "noun" },
+    { es: "el hisopo", en: "cotton swab", type: "noun" },
+    { es: "el algodón", en: "cotton", type: "noun" },
+
+    // The Body (Parts involved in routines/grooming)
+    { es: "el cuerpo", en: "body", type: "noun" },
+    { es: "la cabeza", en: "head", type: "noun" },
+    { es: "el cabello", en: "hair (formal)", type: "noun" },
+    { es: "el pelo", en: "hair (general)", type: "noun" },
+    { es: "el rostro", en: "face (formal)", type: "noun" },
+    { es: "la cara", en: "face", type: "noun" },
+    { es: "la frente", en: "forehead", type: "noun" },
+    { es: "la ceja", en: "eyebrow", type: "noun" },
+    { es: "la pestaña", en: "eyelash", type: "noun" },
+    { es: "el ojo", en: "eye", type: "noun" },
+    { es: "la nariz", en: "nose", type: "noun" },
+    { es: "la mejilla", en: "cheek", type: "noun" },
+    { es: "la boca", en: "mouth", type: "noun" },
+    { es: "el labio", en: "lip", type: "noun" },
+    { es: "el diente", en: "tooth", type: "noun" },
+    { es: "la muela", en: "molar", type: "noun" },
+    { es: "la mandíbula", en: "jaw", type: "noun" },
+    { es: "la barbilla", en: "chin", type: "noun" },
+    { es: "la oreja", en: "ear (outer)", type: "noun" },
+    { es: "el cuello", en: "neck", type: "noun" },
+    { es: "la garganta", en: "throat", type: "noun" },
+    { es: "el hombro", en: "shoulder", type: "noun" },
+    { es: "el pecho", en: "chest", type: "noun" },
+    { es: "la espalda", en: "back (anatomy)", type: "noun" },
+    { es: "el abdomen", en: "abdomen", type: "noun" },
+    { es: "la barriga", en: "belly", type: "noun" },
+    { es: "la cintura", en: "waist", type: "noun" },
+    { es: "la cadera", en: "hip", type: "noun" },
+    { es: "el brazo", en: "arm", type: "noun" },
+    { es: "el codo", en: "elbow", type: "noun" },
+    { es: "la muñeca", en: "wrist", type: "noun" },
+    { es: "la mano", en: "hand", type: "noun" },
+    { es: "el dedo", en: "finger", type: "noun" },
+    { es: "la uña", en: "nail", type: "noun" },
+    { es: "la pierna", en: "leg", type: "noun" },
+    { es: "el muslo", en: "thigh", type: "noun" },
+    { es: "la rodilla", en: "knee", type: "noun" },
+    { es: "el tobillo", en: "ankle", type: "noun" },
+    { es: "el pie", en: "foot", type: "noun" },
+    { es: "el talón", en: "heel", type: "noun" },
+
+    // Clothing & Getting Dressed
+    { es: "la ropa", en: "clothes", type: "noun" },
+    { es: "la prenda", en: "garment", type: "noun" },
+    { es: "la camisa", en: "button-down shirt", type: "noun" },
+    { es: "la camiseta", en: "t-shirt", type: "noun" },
+    { es: "la blusa", en: "blouse", type: "noun" },
+    { es: "el pantalón", en: "pants", type: "noun" },
+    { es: "los jeans", en: "jeans", type: "noun" },
+    { es: "la falda", en: "skirt", type: "noun" },
+    { es: "el vestido", en: "dress", type: "noun" },
+    { es: "el traje", en: "suit", type: "noun" },
+    { es: "la corbata", en: "tie", type: "noun" },
+    { es: "el abrigo", en: "coat", type: "noun" },
+    { es: "la chaqueta", en: "jacket (Spain/LatAm)", type: "noun" },
+    { es: "la chamarra", en: "jacket (Mexico)", type: "noun" },
+    { es: "el suéter", en: "sweater", type: "noun" },
+    { es: "la sudadera", en: "sweatshirt", type: "noun" },
+    { es: "el zapato", en: "shoe", type: "noun" },
+    { es: "la zapatilla", en: "sneaker / slipper", type: "noun" },
+    { es: "el calcetín", en: "sock", type: "noun" },
+    { es: "la media", en: "stocking / sock (LatAm)", type: "noun" },
+    { es: "la ropa interior", en: "underwear", type: "noun" },
+    { es: "el calzoncillo", en: "men's underwear", type: "noun" },
+    { es: "la braga", en: "women's underwear (Spain)", type: "noun" },
+    { es: "el sostén", en: "bra (formal)", type: "noun" },
+    { es: "el sujetador", en: "bra (Spain)", type: "noun" },
+    { es: "el pijama", en: "pajamas", type: "noun" },
+    { es: "la bata", en: "robe / bathrobe", type: "noun" },
+    { es: "el cinto", en: "belt", type: "noun" },
+    { es: "la bufanda", en: "scarf", type: "noun" },
+    { es: "el guante", en: "glove", type: "noun" },
+    { es: "el sombrero", en: "hat", type: "noun" },
+    { es: "la gorra", en: "cap", type: "noun" },
+    { es: "el anillo", en: "ring", type: "noun" },
+    { es: "el collar", en: "necklace", type: "noun" },
+    { es: "la pulsera", en: "bracelet", type: "noun" },
+    { es: "el arete", en: "earring", type: "noun" },
+
+    // Greetings, Courtesy & Expressions
+    { es: "la cortesía", en: "courtesy", type: "noun" },
+    { es: "la amabilidad", en: "kindness", type: "noun" },
+    { es: "los modales", en: "manners", type: "noun" },
+    { es: "la consideración", en: "consideration", type: "noun" },
+    { es: "la gratitud", en: "gratitude", type: "noun" },
+    { es: "el agradecimiento", en: "appreciation / thanks", type: "noun" },
+    { es: "la bienvenida", en: "welcome", type: "noun" },
+    { es: "la despedida", en: "farewell / goodbye", type: "noun" },
+    { es: "el saludo", en: "greeting", type: "noun" },
+    { es: "el permiso", en: "permission / excuse me", type: "noun" },
+    { es: "el halago", en: "flattery / compliment", type: "noun" },
+    { es: "el elogio", en: "praise / compliment", type: "noun" },
+    { es: "la paciencia", en: "patience", type: "noun" },
+
+    // --- VERBS: Daily Routines & Polite Interactions (50 Verbs) ---
+    { es: "despertar", en: "to wake up", type: "verb" },
+    { es: "levantar", en: "to get up / to lift", type: "verb" },
+    { es: "duchar", en: "to shower", type: "verb" },
+    { es: "bañar", en: "to bathe", type: "verb" },
+    { es: "cepillar", en: "to brush", type: "verb" },
+    { es: "peinar", en: "to comb", type: "verb" },
+    { es: "maquillar", en: "to apply makeup", type: "verb" },
+    { es: "afeitar", en: "to shave", type: "verb" },
+    { es: "vestir", en: "to dress", type: "verb" },
+    { es: "desvestir", en: "to undress", type: "verb" },
+    { es: "calzar", en: "to put on shoes", type: "verb" },
+    { es: "acostar", en: "to go to bed / to lay down", type: "verb" },
+    { es: "dormir", en: "to sleep", type: "verb" },
+    { es: "madrugar", en: "to wake up early", type: "verb" },
+    { es: "trasnochar", en: "to stay up late", type: "verb" },
+    { es: "soñar", en: "to dream", type: "verb" },
+    { es: "bostezar", en: "to yawn", type: "verb" },
+    { es: "roncar", en: "to snore", type: "verb" },
+    { es: "descansar", en: "to rest", type: "verb" },
+    { es: "relajar", en: "to relax", type: "verb" },
+    { es: "estirar", en: "to stretch", type: "verb" },
+    { es: "enjuagar", en: "to rinse", type: "verb" },
+    { es: "frotar", en: "to rub / to scrub", type: "verb" },
+    { es: "secar", en: "to dry", type: "verb" },
+    { es: "perfumar", en: "to perfume", type: "verb" },
+    { es: "hidratar", en: "to moisturize / to hydrate", type: "verb" },
+    { es: "sudar", en: "to sweat", type: "verb" },
+    { es: "abrochar", en: "to button / to fasten", type: "verb" },
+    { es: "desabrochar", en: "to unbutton", type: "verb" },
+    { es: "atar", en: "to tie", type: "verb" },
+    { es: "desatar", en: "to untie", type: "verb" },
+    { es: "planchar", en: "to iron", type: "verb" },
+    { es: "tender", en: "to make the bed / to hang clothes", type: "verb" },
+    { es: "colgar", en: "to hang up", type: "verb" },
+    { es: "agradecer", en: "to thank", type: "verb" },
+    { es: "felicitar", en: "to congratulate", type: "verb" },
+    { es: "elogiar", en: "to praise", type: "verb" },
+    { es: "halagar", en: "to flatter", type: "verb" },
+    { es: "tutear", en: "to address informally (with 'tú')", type: "verb" },
+    { es: "vosear", en: "to address informally (with 'vos')", type: "verb" },
+    { es: "asentir", en: "to nod (in agreement)", type: "verb" },
+    { es: "sonrojar", en: "to blush", type: "verb" },
+    { es: "reverenciar", en: "to bow / to revere", type: "verb" },
+    { es: "complacer", en: "to please", type: "verb" },
+    { es: "molestar", en: "to bother / to annoy", type: "verb" },
+    { es: "interrumpir", en: "to interrupt", type: "verb" },
+    { es: "incomodar", en: "to make uncomfortable", type: "verb" },
+    { es: "consentir", en: "to consent / to spoil someone", type: "verb" },
+
+// --- NOUNS: Childcare, Parenting & Early Development (150 Nouns) ---
+    // Baby Gear & Necessities
+    { es: "el cochecito", en: "stroller", type: "noun" },
+    { es: "la carriola", en: "stroller (LatAm)", type: "noun" },
+    { es: "el biberón", en: "baby bottle", type: "noun" },
+    { es: "la mamila", en: "baby bottle (LatAm)", type: "noun" },
+    { es: "el chupete", en: "pacifier", type: "noun" },
+    { es: "el chupón", en: "pacifier (LatAm)", type: "noun" },
+    { es: "el pañal", en: "diaper", type: "noun" },
+    { es: "la cuna", en: "crib", type: "noun" },
+    { es: "el moisés", en: "bassinet", type: "noun" },
+    { es: "el corralito", en: "playpen", type: "noun" },
+    { es: "el andador", en: "walker", type: "noun" },
+    { es: "la trona", en: "high chair (Spain)", type: "noun" },
+    { es: "la periquera", en: "high chair (LatAm)", type: "noun" },
+    { es: "el babero", en: "bib", type: "noun" },
+    { es: "el cambiador", en: "changing table / pad", type: "noun" },
+    { es: "la pañalera", en: "diaper bag", type: "noun" },
+    { es: "el portabebés", en: "baby carrier", type: "noun" },
+    { es: "el canguro", en: "baby carrier / babysitter", type: "noun" },
+    { es: "la sillita de auto", en: "car seat", type: "noun" },
+    { es: "el alzador", en: "booster seat", type: "noun" },
+    { es: "el mordedor", en: "teether", type: "noun" },
+    { es: "el vasito", en: "sippy cup / small cup", type: "noun" },
+    { es: "el orinal", en: "potty", type: "noun" },
+    { es: "la bacinilla", en: "potty (LatAm)", type: "noun" },
+    { es: "la cuna de viaje", en: "travel crib", type: "noun" },
+    { es: "el capazo", en: "carrycot", type: "noun" },
+    { es: "el dosel", en: "canopy (for crib)", type: "noun" },
+    { es: "el móvil de cuna", en: "crib mobile", type: "noun" },
+    { es: "la luz de noche", en: "nightlight", type: "noun" },
+    { es: "el vigilabebés", en: "baby monitor", type: "noun" },
+    { es: "la valla de seguridad", en: "safety gate", type: "noun" },
+    { es: "el cerrojo", en: "latch / child lock", type: "noun" },
+    { es: "el protector de enchufe", en: "outlet cover", type: "noun" },
+    { es: "el aspirador nasal", en: "nasal aspirator", type: "noun" },
+    { es: "la bañera para bebés", en: "baby bathtub", type: "noun" },
+
+    // Toys, Play & Recreation
+    { es: "el juguete", en: "toy", type: "noun" },
+    { es: "el peluche", en: "stuffed animal", type: "noun" },
+    { es: "el osito", en: "teddy bear", type: "noun" },
+    { es: "el rompecabezas", en: "puzzle", type: "noun" },
+    { es: "el bloque", en: "building block", type: "noun" },
+    { es: "la pelota", en: "ball", type: "noun" },
+    { es: "el sonajero", en: "rattle", type: "noun" },
+    { es: "el columpio", en: "swing", type: "noun" },
+    { es: "el tobogán", en: "slide", type: "noun" },
+    { es: "la resbaladilla", en: "slide (LatAm)", type: "noun" },
+    { es: "el arenero", en: "sandbox", type: "noun" },
+    { es: "el triciclo", en: "tricycle", type: "noun" },
+    { es: "la cometa", en: "kite", type: "noun" },
+    { es: "el papalote", en: "kite (Mexico)", type: "noun" },
+    { es: "la plastilina", en: "playdough", type: "noun" },
+    { es: "el escondite", en: "hide and seek", type: "noun" },
+    { es: "el pilla-pilla", en: "game of tag", type: "noun" },
+    { es: "el crayón", en: "crayon", type: "noun" },
+    { es: "la cera", en: "crayon (Spain)", type: "noun" },
+    { es: "el pegotín", en: "sticker", type: "noun" },
+    { es: "la pegatina", en: "sticker (Spain)", type: "noun" },
+    { es: "la calcomanía", en: "sticker (LatAm)", type: "noun" },
+    { es: "la fábula", en: "fable", type: "noun" },
+    { es: "el títere", en: "puppet", type: "noun" },
+    { es: "la marioneta", en: "marionette", type: "noun" },
+    { es: "el disfraz", en: "costume", type: "noun" },
+    { es: "el parque infantil", en: "playground", type: "noun" },
+    { es: "el pasatiempo", en: "hobby", type: "noun" },
+    { es: "la manualidad", en: "craft", type: "noun" },
+    { es: "el campamento de verano", en: "summer camp", type: "noun" },
+    { es: "el patito de goma", en: "rubber duck", type: "noun" },
+
+    // Health, Feeding & Care
+    { es: "el pediatra", en: "pediatrician (male)", type: "noun" },
+    { es: "la pediatra", en: "pediatrician (female)", type: "noun" },
+    { es: "la vacuna", en: "vaccine", type: "noun" },
+    { es: "el termómetro", en: "thermometer", type: "noun" },
+    { es: "la fiebre", en: "fever", type: "noun" },
+    { es: "la curita", en: "band-aid (LatAm)", type: "noun" },
+    { es: "la tirita", en: "band-aid (Spain)", type: "noun" },
+    { es: "el jarabe", en: "syrup / liquid medicine", type: "noun" },
+    { es: "la pomada", en: "ointment", type: "noun" },
+    { es: "el talco", en: "baby powder", type: "noun" },
+    { es: "la toallita", en: "baby wipe", type: "noun" },
+    { es: "la pomada protectora", en: "diaper cream", type: "noun" },
+    { es: "la lactancia", en: "breastfeeding", type: "noun" },
+    { es: "la leche materna", en: "breast milk", type: "noun" },
+    { es: "la fórmula", en: "baby formula", type: "noun" },
+    { es: "el sacaleches", en: "breast pump", type: "noun" },
+    { es: "la ecografía", en: "ultrasound", type: "noun" },
+    { es: "el ultrasonido", en: "ultrasound (LatAm)", type: "noun" },
+    { es: "la matrona", en: "midwife", type: "noun" },
+    { es: "la partera", en: "midwife (LatAm)", type: "noun" },
+    { es: "la cigüeña", en: "stork", type: "noun" },
+    { es: "la encía", en: "gum (anatomy)", type: "noun" },
+    { es: "la saliva", en: "saliva", type: "noun" },
+    { es: "la baba", en: "drool", type: "noun" },
+    { es: "el eructo", en: "burp", type: "noun" },
+    { es: "el cólico", en: "colic", type: "noun" },
+    { es: "la cita médica", en: "medical appointment", type: "noun" },
+    { es: "el potito", en: "baby food jar (Spain)", type: "noun" },
+    { es: "la compota", en: "baby food (LatAm)", type: "noun" },
+    { es: "la papilla", en: "baby porridge / mash", type: "noun" },
+    { es: "el cordón umbilical", en: "umbilical cord", type: "noun" },
+    { es: "el pañuelo", en: "handkerchief / tissue", type: "noun" },
+
+    // Development, Behavior & Concepts
+    { es: "el gateo", en: "crawling", type: "noun" },
+    { es: "el balbuceo", en: "babbling", type: "noun" },
+    { es: "el berrinche", en: "tantrum", type: "noun" },
+    { es: "la rabieta", en: "tantrum (Spain)", type: "noun" },
+    { es: "el capricho", en: "whim", type: "noun" },
+    { es: "el sollozo", en: "sob", type: "noun" },
+    { es: "la travesura", en: "mischief", type: "noun" },
+    { es: "la disciplina", en: "discipline", type: "noun" },
+    { es: "el incentivo", en: "incentive", type: "noun" },
+    { es: "el arrullo", en: "lullaby", type: "noun" },
+    { es: "la nana", en: "nanny / lullaby", type: "noun" },
+    { es: "el cariño", en: "affection", type: "noun" },
+    { es: "la ternura", en: "tenderness", type: "noun" },
+    { es: "la protección", en: "protection", type: "noun" },
+    { es: "la supervisión", en: "supervision", type: "noun" },
+    { es: "el crecimiento", en: "growth", type: "noun" },
+    { es: "la etapa", en: "stage / phase", type: "noun" },
+    { es: "el comportamiento", en: "behavior", type: "noun" },
+    { es: "la conducta", en: "conduct", type: "noun" },
+    { es: "la obediencia", en: "obedience", type: "noun" },
+    { es: "la desobediencia", en: "disobedience", type: "noun" },
+    { es: "el apego", en: "attachment", type: "noun" },
+    { es: "la autonomía", en: "autonomy", type: "noun" },
+    { es: "la autoestima", en: "self-esteem", type: "noun" },
+    { es: "la inocencia", en: "innocence", type: "noun" },
+    { es: "la imaginación", en: "imagination", type: "noun" },
+    { es: "la creatividad", en: "creativity", type: "noun" },
+    { es: "el talento", en: "talent", type: "noun" },
+    { es: "la reprimenda", en: "reprimand", type: "noun" },
+    { es: "el regaño", en: "scolding", type: "noun" },
+    { es: "la alabanza", en: "praise", type: "noun" },
+    { es: "el esfuerzo", en: "effort", type: "noun" },
+    { es: "el logro", en: "achievement", type: "noun" },
+    { es: "la maternidad", en: "motherhood / maternity", type: "noun" },
+
+    // Child-Specific Clothing & Institutions
+    { es: "el mameluco", en: "onesie (LatAm)", type: "noun" },
+    { es: "el pelele", en: "onesie (Spain)", type: "noun" },
+    { es: "el patuco", en: "baby bootie", type: "noun" },
+    { es: "el bodi", en: "onesie / body", type: "noun" },
+    { es: "el peto", en: "overalls", type: "noun" },
+    { es: "el jardinero", en: "overalls (LatAm)", type: "noun" },
+    { es: "la manopla", en: "mitten", type: "noun" },
+    { es: "el gorrito", en: "baby hat", type: "noun" },
+    { es: "el kínder", en: "kindergarten", type: "noun" },
+    { es: "el parvulario", en: "preschool", type: "noun" },
+    { es: "el jardín de infantes", en: "kindergarten", type: "noun" },
+    { es: "el refrigerio", en: "snack (LatAm)", type: "noun" },
+    { es: "el niñero", en: "male babysitter", type: "noun" },
+    { es: "el preescolar", en: "preschool", type: "noun" },
+
+    // --- VERBS: Caregiving, Development & Play (50 Verbs) ---
+    { es: "gatear", en: "to crawl", type: "verb" },
+    { es: "balbucear", en: "to babble", type: "verb" },
+    { es: "amamantar", en: "to breastfeed", type: "verb" },
+    { es: "destetar", en: "to wean", type: "verb" },
+    { es: "arrullar", en: "to lull to sleep", type: "verb" },
+    { es: "mecer", en: "to rock", type: "verb" },
+    { es: "mimar", en: "to pamper / to spoil", type: "verb" },
+    { es: "malcriar", en: "to spoil (a child)", type: "verb" },
+    { es: "regañar", en: "to scold", type: "verb" },
+    { es: "obedecer", en: "to obey", type: "verb" },
+    { es: "desobedecer", en: "to disobey", type: "verb" },
+    { es: "premiar", en: "to reward", type: "verb" },
+    { es: "alabar", en: "to praise", type: "verb" },
+    { es: "vigilar", en: "to watch over / to supervise", type: "verb" },
+    { es: "supervisar", en: "to supervise", type: "verb" },
+    { es: "calmar", en: "to calm", type: "verb" },
+    { es: "tranquilizar", en: "to calm down / to reassure", type: "verb" },
+    { es: "babear", en: "to drool", type: "verb" },
+    { es: "eructar", en: "to burp", type: "verb" },
+    { es: "vomitar", en: "to vomit", type: "verb" },
+    { es: "escupir", en: "to spit", type: "verb" },
+    { es: "manchar", en: "to stain", type: "verb" },
+    { es: "ensuciar", en: "to dirty / to soil", type: "verb" },
+    { es: "recoger", en: "to pick up / to tidy up", type: "verb" },
+    { es: "enjabonar", en: "to lather / to soap", type: "verb" },
+    { es: "vacunar", en: "to vaccinate", type: "verb" },
+    { es: "abrigar", en: "to wrap up / to bundle up", type: "verb" },
+    { es: "arropar", en: "to tuck in", type: "verb" },
+    { es: "tapar", en: "to cover", type: "verb" },
+    { es: "destapar", en: "to uncover", type: "verb" },
+    { es: "intercambiar", en: "to exchange", type: "verb" },
+    { es: "esconder", en: "to hide", type: "verb" },
+    { es: "saltar", en: "to jump", type: "verb" },
+    { es: "brincar", en: "to hop / to jump", type: "verb" },
+    { es: "balancear", en: "to balance / to swing", type: "verb" },
+    { es: "columpiar", en: "to swing", type: "verb" },
+    { es: "deslizar", en: "to slide", type: "verb" },
+    { es: "dibujar", en: "to draw", type: "verb" },
+    { es: "colorear", en: "to color", type: "verb" },
+    { es: "imaginar", en: "to imagine", type: "verb" },
+    { es: "fingir", en: "to pretend", type: "verb" },
+    { es: "tropezar", en: "to trip", type: "verb" },
+    { es: "caer", en: "to fall", type: "verb" },
+    { es: "lastimar", en: "to hurt / to injure", type: "verb" },
+    { es: "curar", en: "to heal / to treat", type: "verb" },
+    { es: "sanar", en: "to heal / to cure", type: "verb" },
+    { es: "pellizcar", en: "to pinch", type: "verb" },
+    { es: "rasguñar", en: "to scratch (LatAm)", type: "verb" },
+    { es: "arañar", en: "to scratch", type: "verb" },
+    { es: "empujar", en: "to push", type: "verb" },
+
+
+       ];
+
+        let currentDeck = [...allVocab];
+        let currentIndex = 0;
+
+        const cardElement = document.getElementById('flashcard');
+        const esWordElement = document.getElementById('es-word');
+        const enWordElement = document.getElementById('en-word');
+        const esTypeElement = document.getElementById('es-type');
+        const enTypeElement = document.getElementById('en-type');
+        const counterElement = document.getElementById('counter');
+
+        function updateCard() {
+            if (currentDeck.length === 0) {
+                esWordElement.textContent = "No cards";
+                enWordElement.textContent = "No cards";
+                esTypeElement.textContent = "";
+                enTypeElement.textContent = "";
+                counterElement.textContent = "0 / 0";
+                return;
+            }
+
+            cardElement.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                const card = currentDeck[currentIndex];
+                esWordElement.textContent = card.es;
+                enWordElement.textContent = card.en;
+                esTypeElement.textContent = card.type;
+                enTypeElement.textContent = card.type;
+                counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            if (currentDeck.length > 0) {
+                cardElement.classList.toggle('is-flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex + 1) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function filterCards() {
+            const filterValue = document.getElementById('typeFilter').value;
+            
+            if (filterValue === 'all') {
+                currentDeck = [...allVocab];
+            } else if (filterValue === 'clean') {
+                // Exclude any type starting with 'profanity-'
+                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
+            } else if (filterValue === 'profanity-only') {
+                // Include only types starting with 'profanity-'
+                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
+            } else {
+                // Filter by specific clean category (noun, verb, phrase)
+                currentDeck = allVocab.filter(word => word.type === filterValue);
+            }
+            
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function shuffleCards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
