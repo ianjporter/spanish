@@ -1,0 +1,469 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Deck Template</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --warning-accent: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button, select {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--accent);
+            color: var(--white);
+            transition: background-color 0.3s ease;
+        }
+        button:hover, select:hover {
+            background-color: #2980b9;
+        }
+        .flashcard-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+        .word {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+        .type-badge {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .flashcard-back .type-badge {
+            background: rgba(255,255,255,0.2);
+        }
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vocabulary Deck Template</h1>
+    
+    <div class="controls">
+        <select id="typeFilter" onchange="filterCards()">
+            <option value="all">All Words (Includes Profanity)</option>
+            <option value="clean">Clean Deck (No Profanity)</option>
+            <option value="profanity-only">Profanity & Slang Only</option>
+            <option value="noun">Nouns Only (Clean)</option>
+            <option value="verb">Verbs Only (Clean)</option>
+            <option value="phrase">Phrases Only (Clean)</option>
+        </select>
+        <button onclick="shuffleCards()">Shuffle Deck</button>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+                <div class="word" id="es-word">Cargando...</div>
+                <div class="type-badge" id="es-type">...</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div class="word" id="en-word">Loading...</div>
+                <div class="type-badge" id="en-type">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button onclick="prevCard()">&#8592; Previous</button>
+        <div class="counter" id="counter">0 / 0</div>
+        <button onclick="nextCard()">Next &#8594;</button>
+    </div>
+
+    <script>
+        // Vocabulary Database
+        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
+        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        const allVocab = [
+     // --- NOUNS: Nature, Geography & The Outdoors (150 Nouns) ---
+    // Landscapes & Geography
+    { es: "la naturaleza", en: "nature", type: "noun" },
+    { es: "la montaña", en: "mountain", type: "noun" },
+    { es: "el bosque", en: "forest / woods", type: "noun" },
+    { es: "la selva", en: "jungle / rainforest", type: "noun" },
+    { es: "la jungla", en: "jungle", type: "noun" },
+    { es: "el desierto", en: "desert", type: "noun" },
+    { es: "el valle", en: "valley", type: "noun" },
+    { es: "la colina", en: "hill", type: "noun" },
+    { es: "el cerro", en: "hill / mount", type: "noun" },
+    { es: "la llanura", en: "plain", type: "noun" },
+    { es: "el prado", en: "meadow", type: "noun" },
+    { es: "el campo", en: "countryside / field", type: "noun" },
+    { es: "la costa", en: "coast", type: "noun" },
+    { es: "la playa", en: "beach", type: "noun" },
+    { es: "el océano", en: "ocean", type: "noun" },
+    { es: "el mar", en: "sea", type: "noun" },
+    { es: "el río", en: "river", type: "noun" },
+    { es: "el lago", en: "lake", type: "noun" },
+    { es: "la laguna", en: "lagoon / small lake", type: "noun" },
+    { es: "la cascada", en: "waterfall", type: "noun" },
+    { es: "la catarata", en: "large waterfall", type: "noun" },
+    { es: "el arroyo", en: "stream / creek", type: "noun" },
+    { es: "la isla", en: "island", type: "noun" },
+    { es: "el volcán", en: "volcano", type: "noun" },
+    { es: "la cueva", en: "cave", type: "noun" },
+    { es: "el acantilado", en: "cliff", type: "noun" },
+    { es: "el cañón", en: "canyon", type: "noun" },
+    { es: "la península", en: "peninsula", type: "noun" },
+    { es: "el glaciar", en: "glacier", type: "noun" },
+    { es: "el pantano", en: "swamp", type: "noun" },
+
+    // Weather & The Sky
+    { es: "el cielo", en: "sky", type: "noun" },
+    { es: "el sol", en: "sun", type: "noun" },
+    { es: "la luna", en: "moon", type: "noun" },
+    { es: "la estrella", en: "star", type: "noun" },
+    { es: "la nube", en: "cloud", type: "noun" },
+    { es: "la lluvia", en: "rain", type: "noun" },
+    { es: "la nieve", en: "snow", type: "noun" },
+    { es: "el viento", en: "wind", type: "noun" },
+    { es: "la tormenta", en: "storm", type: "noun" },
+    { es: "el relámpago", en: "lightning (flash)", type: "noun" },
+    { es: "el rayo", en: "lightning bolt", type: "noun" },
+    { es: "el trueno", en: "thunder", type: "noun" },
+    { es: "el clima", en: "climate", type: "noun" },
+    { es: "el tiempo", en: "weather / time", type: "noun" },
+    { es: "la brisa", en: "breeze", type: "noun" },
+    { es: "el huracán", en: "hurricane", type: "noun" },
+    { es: "el tornado", en: "tornado", type: "noun" },
+    { es: "la niebla", en: "fog", type: "noun" },
+    { es: "la neblina", en: "mist", type: "noun" },
+    { es: "el granizo", en: "hail", type: "noun" },
+    { es: "el arcoíris", en: "rainbow", type: "noun" },
+    { es: "la sombra", en: "shade / shadow", type: "noun" },
+    { es: "la luz", en: "light", type: "noun" },
+    { es: "el amanecer", en: "dawn / sunrise", type: "noun" },
+    { es: "el atardecer", en: "dusk / sunset", type: "noun" },
+    { es: "el crepúsculo", en: "twilight", type: "noun" },
+
+    // Flora (Plants & Trees)
+    { es: "el árbol", en: "tree", type: "noun" },
+    { es: "la planta", en: "plant", type: "noun" },
+    { es: "la flor", en: "flower", type: "noun" },
+    { es: "la hoja", en: "leaf", type: "noun" },
+    { es: "la rama", en: "branch", type: "noun" },
+    { es: "el tronco", en: "trunk (of a tree)", type: "noun" },
+    { es: "la raíz", en: "root", type: "noun" },
+    { es: "el césped", en: "lawn / grass", type: "noun" },
+    { es: "la hierba", en: "grass / herb", type: "noun" },
+    { es: "el arbusto", en: "bush / shrub", type: "noun" },
+    { es: "el pino", en: "pine tree", type: "noun" },
+    { es: "el roble", en: "oak tree", type: "noun" },
+    { es: "la semilla", en: "seed", type: "noun" },
+    { es: "la espina", en: "thorn", type: "noun" },
+    { es: "el pétalo", en: "petal", type: "noun" },
+    { es: "el polen", en: "pollen", type: "noun" },
+    { es: "el huerto", en: "orchard / vegetable garden", type: "noun" },
+    { es: "la maleza", en: "weeds / undergrowth", type: "noun" },
+    { es: "el musgo", en: "moss", type: "noun" },
+    { es: "el hongo", en: "fungus / mushroom", type: "noun" },
+    { es: "la seta", en: "mushroom (for foraging/eating)", type: "noun" },
+    { es: "el helecho", en: "fern", type: "noun" },
+    { es: "la enredadera", en: "vine / creeper", type: "noun" },
+    { es: "la flora", en: "flora", type: "noun" },
+
+    // Fauna (Wildlife & Insects)
+    { es: "la fauna", en: "fauna / wildlife", type: "noun" },
+    { es: "el mamífero", en: "mammal", type: "noun" },
+    { es: "el reptil", en: "reptile", type: "noun" },
+    { es: "el anfibio", en: "amphibian", type: "noun" },
+    { es: "el insecto", en: "insect", type: "noun" },
+    { es: "el oso", en: "bear", type: "noun" },
+    { es: "el lobo", en: "wolf", type: "noun" },
+    { es: "el zorro", en: "fox", type: "noun" },
+    { es: "el ciervo", en: "deer", type: "noun" },
+    { es: "el venado", en: "deer (LatAm)", type: "noun" },
+    { es: "el conejo", en: "rabbit", type: "noun" },
+    { es: "la ardilla", en: "squirrel", type: "noun" },
+    { es: "el águila", en: "eagle (f. noun, uses 'el')", type: "noun" },
+    { es: "el halcón", en: "hawk / falcon", type: "noun" },
+    { es: "el búho", en: "owl", type: "noun" },
+    { es: "la lechuza", en: "barn owl", type: "noun" },
+    { es: "la serpiente", en: "snake", type: "noun" },
+    { es: "la culebra", en: "snake", type: "noun" },
+    { es: "la rana", en: "frog", type: "noun" },
+    { es: "el sapo", en: "toad", type: "noun" },
+    { es: "la araña", en: "spider", type: "noun" },
+    { es: "la hormiga", en: "ant", type: "noun" },
+    { es: "la abeja", en: "bee", type: "noun" },
+    { es: "la avispa", en: "wasp", type: "noun" },
+    { es: "la mariposa", en: "butterfly", type: "noun" },
+    { es: "la mosca", en: "fly (insect)", type: "noun" },
+    { es: "el mosquito", en: "mosquito", type: "noun" },
+    
+    // Backyard Homesteading & Animals
+    { es: "la gallina", en: "hen / chicken", type: "noun" },
+    { es: "el gallo", en: "rooster", type: "noun" },
+    { es: "el pollito", en: "chick", type: "noun" },
+    { es: "el nido", en: "nest", type: "noun" },
+    { es: "la garra", en: "claw / talon", type: "noun" },
+    { es: "el hocico", en: "snout / muzzle", type: "noun" },
+    { es: "la cola", en: "tail", type: "noun" },
+    { es: "el cuerno", en: "horn", type: "noun" },
+    { es: "el corral", en: "pen / corral", type: "noun" },
+    { es: "el gallinero", en: "chicken coop", type: "noun" },
+    { es: "el cobertizo", en: "storage shed", type: "noun" },
+
+    // Outdoor Recreation, Trails & Gear
+    { es: "el sendero", en: "trail / path", type: "noun" },
+    { es: "el camino", en: "path / road / way", type: "noun" },
+    { es: "el campamento", en: "camp / campground", type: "noun" },
+    { es: "la tienda de campaña", en: "tent", type: "noun" },
+    { es: "la carpa", en: "tent (LatAm)", type: "noun" },
+    { es: "la fogata", en: "campfire", type: "noun" },
+    { es: "la hoguera", en: "bonfire", type: "noun" },
+    { es: "el saco de dormir", en: "sleeping bag (Spain)", type: "noun" },
+    { es: "la bolsa de dormir", en: "sleeping bag (LatAm)", type: "noun" },
+    { es: "la linterna", en: "flashlight / lantern", type: "noun" },
+    { es: "la brújula", en: "compass (navigation)", type: "noun" },
+    { es: "la cantimplora", en: "canteen / water flask", type: "noun" },
+    { es: "los binoculares", en: "binoculars (LatAm)", type: "noun" },
+    { es: "los prismáticos", en: "binoculars (Spain)", type: "noun" },
+    { es: "la bota", en: "boot", type: "noun" },
+    { es: "el bastón", en: "walking stick / pole", type: "noun" },
+    { es: "la reserva", en: "nature reserve", type: "noun" },
+    { es: "el paisaje", en: "landscape / scenery", type: "noun" },
+    { es: "el mirador", en: "viewpoint / scenic overlook", type: "noun" },
+
+    // Gardening, Soil & Earth
+    { es: "la pala", en: "shovel", type: "noun" },
+    { es: "el rastrillo", en: "rake", type: "noun" },
+    { es: "la manguera", en: "hose", type: "noun" },
+    { es: "la maceta", en: "flowerpot", type: "noun" },
+    { es: "la tierra", en: "earth / dirt / soil", type: "noun" },
+    { es: "el barro", en: "clay / mud", type: "noun" },
+    { es: "el lodo", en: "mud", type: "noun" },
+    { es: "la arena", en: "sand", type: "noun" },
+    { es: "la piedra", en: "stone", type: "noun" },
+    { es: "la roca", en: "rock", type: "noun" },
+    { es: "el polvo", en: "dust", type: "noun" },
+    { es: "la huella", en: "footprint / track", type: "noun" },
+    { es: "la cima", en: "summit / peak", type: "noun" },
+
+    // --- VERBS: Nature, Outdoors & Gardening Actions (50 Verbs) ---
+    { es: "acampar", en: "to camp", type: "verb" },
+    { es: "explorar", en: "to explore", type: "verb" },
+    { es: "escalar", en: "to climb (a mountain/rock)", type: "verb" },
+    { es: "trepar", en: "to climb (a tree/wall)", type: "verb" },
+    { es: "excursionar", en: "to go on a hike/excursion", type: "verb" },
+    { es: "nadar", en: "to swim", type: "verb" },
+    { es: "pescar", en: "to fish", type: "verb" },
+    { es: "cazar", en: "to hunt", type: "verb" },
+    { es: "plantar", en: "to plant", type: "verb" },
+    { es: "sembrar", en: "to sow / to plant", type: "verb" },
+    { es: "cosechar", en: "to harvest", type: "verb" },
+    { es: "regar", en: "to water / to irrigate", type: "verb" },
+    { es: "cultivar", en: "to cultivate / to grow", type: "verb" },
+    { es: "podar", en: "to prune", type: "verb" },
+    { es: "florecer", en: "to bloom / to flourish", type: "verb" },
+    { es: "brotar", en: "to sprout / to bud", type: "verb" },
+    { es: "marchitar", en: "to wither", type: "verb" },
+    { es: "llover", en: "to rain", type: "verb" },
+    { es: "nevar", en: "to snow", type: "verb" },
+    { es: "tronar", en: "to thunder", type: "verb" },
+    { es: "relampaguear", en: "to flash lightning", type: "verb" },
+    { es: "amanecer", en: "to dawn", type: "verb" },
+    { es: "atardecer", en: "to grow dark / get late", type: "verb" },
+    { es: "anochecer", en: "to fall night / get dark", type: "verb" },
+    { es: "despejar", en: "to clear up (sky/weather)", type: "verb" },
+    { es: "nublar", en: "to cloud over", type: "verb" },
+    { es: "rugir", en: "to roar", type: "verb" },
+    { es: "ladrar", en: "to bark", type: "verb" },
+    { es: "maullar", en: "to meow", type: "verb" },
+    { es: "piar", en: "to chirp / to tweet", type: "verb" },
+    { es: "aletear", en: "to flap wings", type: "verb" },
+    { es: "sumergir", en: "to submerge", type: "verb" },
+    { es: "flotar", en: "to float", type: "verb" },
+    { es: "remar", en: "to row", type: "verb" },
+    { es: "rastrear", en: "to track", type: "verb" },
+    { es: "observar", en: "to observe / to watch", type: "verb" },
+    { es: "admirar", en: "to admire", type: "verb" },
+    { es: "contaminar", en: "to pollute", type: "verb" },
+    { es: "purificar", en: "to purify", type: "verb" },
+    { es: "reciclar", en: "to recycle", type: "verb" },
+    { es: "cavar", en: "to dig", type: "verb" },
+    { es: "enterrar", en: "to bury", type: "verb" },
+    { es: "desenterrar", en: "to unearth / to dig up", type: "verb" },
+    { es: "arrancar", en: "to pull out / to uproot", type: "verb" },
+    { es: "recolectar", en: "to collect / to gather", type: "verb" },
+    { es: "pastar", en: "to graze", type: "verb" },
+    { es: "hibernar", en: "to hibernate", type: "verb" },
+    { es: "chapotear", en: "to splash", type: "verb" },
+    { es: "resbalar", en: "to slip", type: "verb" },
+    { es: "orientar", en: "to orient / to guide", type: "verb" },
+
+
+
+
+       ];
+
+        let currentDeck = [...allVocab];
+        let currentIndex = 0;
+
+        const cardElement = document.getElementById('flashcard');
+        const esWordElement = document.getElementById('es-word');
+        const enWordElement = document.getElementById('en-word');
+        const esTypeElement = document.getElementById('es-type');
+        const enTypeElement = document.getElementById('en-type');
+        const counterElement = document.getElementById('counter');
+
+        function updateCard() {
+            if (currentDeck.length === 0) {
+                esWordElement.textContent = "No cards";
+                enWordElement.textContent = "No cards";
+                esTypeElement.textContent = "";
+                enTypeElement.textContent = "";
+                counterElement.textContent = "0 / 0";
+                return;
+            }
+
+            cardElement.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                const card = currentDeck[currentIndex];
+                esWordElement.textContent = card.es;
+                enWordElement.textContent = card.en;
+                esTypeElement.textContent = card.type;
+                enTypeElement.textContent = card.type;
+                counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            if (currentDeck.length > 0) {
+                cardElement.classList.toggle('is-flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex + 1) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function filterCards() {
+            const filterValue = document.getElementById('typeFilter').value;
+            
+            if (filterValue === 'all') {
+                currentDeck = [...allVocab];
+            } else if (filterValue === 'clean') {
+                // Exclude any type starting with 'profanity-'
+                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
+            } else if (filterValue === 'profanity-only') {
+                // Include only types starting with 'profanity-'
+                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
+            } else {
+                // Filter by specific clean category (noun, verb, phrase)
+                currentDeck = allVocab.filter(word => word.type === filterValue);
+            }
+            
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function shuffleCards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
