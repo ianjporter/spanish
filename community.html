@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Deck Template</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --warning-accent: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button, select {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--accent);
+            color: var(--white);
+            transition: background-color 0.3s ease;
+        }
+        button:hover, select:hover {
+            background-color: #2980b9;
+        }
+        .flashcard-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+        .word {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+        .type-badge {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .flashcard-back .type-badge {
+            background: rgba(255,255,255,0.2);
+        }
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vocabulary Deck Template</h1>
+    
+    <div class="controls">
+        <select id="typeFilter" onchange="filterCards()">
+            <option value="all">All Words (Includes Profanity)</option>
+            <option value="clean">Clean Deck (No Profanity)</option>
+            <option value="profanity-only">Profanity & Slang Only</option>
+            <option value="noun">Nouns Only (Clean)</option>
+            <option value="verb">Verbs Only (Clean)</option>
+            <option value="phrase">Phrases Only (Clean)</option>
+        </select>
+        <button onclick="shuffleCards()">Shuffle Deck</button>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+                <div class="word" id="es-word">Cargando...</div>
+                <div class="type-badge" id="es-type">...</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div class="word" id="en-word">Loading...</div>
+                <div class="type-badge" id="en-type">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button onclick="prevCard()">&#8592; Previous</button>
+        <div class="counter" id="counter">0 / 0</div>
+        <button onclick="nextCard()">Next &#8594;</button>
+    </div>
+
+    <script>
+        // Vocabulary Database
+        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
+        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        const allVocab = [
+
+
+// --- NOUNS: Families, Homes & Communities (150 Nouns) ---
+    // Nuclear & Extended Family
+    { es: "la madre", en: "mother", type: "noun" },
+    { es: "el padre", en: "father", type: "noun" },
+    { es: "los padres", en: "parents", type: "noun" },
+    { es: "el hijo", en: "son", type: "noun" },
+    { es: "la hija", en: "daughter", type: "noun" },
+    { es: "el hermano", en: "brother", type: "noun" },
+    { es: "la hermana", en: "sister", type: "noun" },
+    { es: "el abuelo", en: "grandfather", type: "noun" },
+    { es: "la abuela", en: "grandmother", type: "noun" },
+    { es: "los abuelos", en: "grandparents", type: "noun" },
+    { es: "el nieto", en: "grandson", type: "noun" },
+    { es: "la nieta", en: "granddaughter", type: "noun" },
+    { es: "el tío", en: "uncle", type: "noun" },
+    { es: "la tía", en: "aunt", type: "noun" },
+    { es: "el sobrino", en: "nephew", type: "noun" },
+    { es: "la sobrina", en: "niece", type: "noun" },
+    { es: "el primo", en: "cousin (male)", type: "noun" },
+    { es: "la prima", en: "cousin (female)", type: "noun" },
+    
+    // In-laws & Blended Families
+    { es: "el suegro", en: "father-in-law", type: "noun" },
+    { es: "la suegra", en: "mother-in-law", type: "noun" },
+    { es: "el yerno", en: "son-in-law", type: "noun" },
+    { es: "la nuera", en: "daughter-in-law", type: "noun" },
+    { es: "el cuñado", en: "brother-in-law", type: "noun" },
+    { es: "la cuñada", en: "sister-in-law", type: "noun" },
+    { es: "el padrastro", en: "stepfather", type: "noun" },
+    { es: "la madrastra", en: "stepmother", type: "noun" },
+    { es: "el hijastro", en: "stepson", type: "noun" },
+    { es: "la hijastra", en: "stepdaughter", type: "noun" },
+    { es: "el hermanastro", en: "stepbrother", type: "noun" },
+    { es: "la hermanastra", en: "stepsister", type: "noun" },
+    { es: "el padrino", en: "godfather", type: "noun" },
+    { es: "la madrina", en: "godmother", type: "noun" },
+    { es: "el ahijado", en: "godson", type: "noun" },
+    { es: "la ahijada", en: "goddaughter", type: "noun" },
+
+    // People, Relationships & Life Stages
+    { es: "el esposo", en: "husband", type: "noun" },
+    { es: "la esposa", en: "wife", type: "noun" },
+    { es: "el marido", en: "husband", type: "noun" },
+    { es: "la mujer", en: "woman / wife", type: "noun" },
+    { es: "el hombre", en: "man", type: "noun" },
+    { es: "el muchacho", en: "boy / young man", type: "noun" },
+    { es: "la muchacha", en: "girl / young woman", type: "noun" },
+    { es: "el niño", en: "child / boy", type: "noun" },
+    { es: "la niña", en: "child / girl", type: "noun" },
+    { es: "el bebé", en: "baby", type: "noun" },
+    { es: "el adolescente", en: "adolescent", type: "noun" },
+    { es: "el joven", en: "young person", type: "noun" },
+    { es: "el adulto", en: "adult", type: "noun" },
+    { es: "el anciano", en: "elderly man", type: "noun" },
+    { es: "la anciana", en: "elderly woman", type: "noun" },
+    { es: "el novio", en: "boyfriend / groom", type: "noun" },
+    { es: "la novia", en: "girlfriend / bride", type: "noun" },
+    { es: "el prometido", en: "fiancé", type: "noun" },
+    { es: "la prometida", en: "fiancée", type: "noun" },
+    { es: "el amigo", en: "friend (male)", type: "noun" },
+    { es: "la amiga", en: "friend (female)", type: "noun" },
+    { es: "el conocido", en: "acquaintance", type: "noun" },
+    { es: "el vecino", en: "neighbor (male)", type: "noun" },
+    { es: "la vecina", en: "neighbor (female)", type: "noun" },
+    { es: "el gemelo", en: "identical twin (male)", type: "noun" },
+    { es: "la gemela", en: "identical twin (female)", type: "noun" },
+    { es: "el mellizo", en: "fraternal twin", type: "noun" },
+    { es: "la pareja", en: "couple / partner", type: "noun" },
+    { es: "el huérfano", en: "orphan", type: "noun" },
+    { es: "la viuda", en: "widow", type: "noun" },
+    { es: "el viudo", en: "widower", type: "noun" },
+    { es: "el soltero", en: "single man", type: "noun" },
+    { es: "la soltera", en: "single woman", type: "noun" },
+    { es: "el pariente", en: "relative", type: "noun" },
+    { es: "el familiar", en: "relative / family member", type: "noun" },
+    { es: "el antepasado", en: "ancestor", type: "noun" },
+    { es: "el descendiente", en: "descendant", type: "noun" },
+
+    // Pets, Care & Interactions
+    { es: "la mascota", en: "pet", type: "noun" },
+    { es: "el perro", en: "dog", type: "noun" },
+    { es: "el gato", en: "cat", type: "noun" },
+    { es: "el pájaro", en: "bird", type: "noun" },
+    { es: "el pez", en: "fish (alive)", type: "noun" },
+    { es: "la guardería", en: "daycare", type: "noun" },
+    { es: "la niñera", en: "nanny / babysitter", type: "noun" },
+    { es: "el parentesco", en: "kinship / relationship", type: "noun" },
+    { es: "la crianza", en: "upbringing / raising", type: "noun" },
+    { es: "el embarazo", en: "pregnancy", type: "noun" },
+    { es: "el parto", en: "childbirth", type: "noun" },
+    { es: "el bautizo", en: "baptism", type: "noun" },
+    { es: "la comunión", en: "communion", type: "noun" },
+    { es: "la boda", en: "wedding", type: "noun" },
+    { es: "el aniversario", en: "anniversary", type: "noun" },
+    { es: "el cumpleaños", en: "birthday", type: "noun" },
+    { es: "el regalo", en: "gift / present", type: "noun" },
+    { es: "la reunión", en: "gathering / meeting", type: "noun" },
+    { es: "el abrazo", en: "hug", type: "noun" },
+    { es: "el beso", en: "kiss", type: "noun" },
+    { es: "la caricia", en: "caress", type: "noun" },
+    { es: "la sonrisa", en: "smile", type: "noun" },
+    { es: "el llanto", en: "crying / weeping", type: "noun" },
+    { es: "la lágrima", en: "tear (drop)", type: "noun" },
+    { es: "la pelea", en: "fight / argument", type: "noun" },
+    { es: "el castigo", en: "punishment", type: "noun" },
+    { es: "el consejo", en: "advice", type: "noun" },
+    { es: "el apoyo", en: "support", type: "noun" },
+    { es: "la ayuda", en: "help", type: "noun" },
+    { es: "el favor", en: "favor", type: "noun" },
+    { es: "el compromiso", en: "engagement / commitment", type: "noun" },
+    { es: "el lazo", en: "bond / tie", type: "noun" },
+    { es: "el vínculo", en: "link / emotional bond", type: "noun" },
+    { es: "la convivencia", en: "cohabitation / living together", type: "noun" },
+
+    // The Home & Housing Types
+    { es: "el hogar", en: "home / hearth", type: "noun" },
+    { es: "la casa", en: "house", type: "noun" },
+    { es: "el apartamento", en: "apartment", type: "noun" },
+    { es: "el departamento", en: "apartment (LatAm)", type: "noun" },
+    { es: "el piso", en: "apartment (Spain) / floor", type: "noun" },
+    { es: "la vivienda", en: "housing / dwelling", type: "noun" },
+    { es: "la mansión", en: "mansion", type: "noun" },
+    { es: "la cabaña", en: "cabin", type: "noun" },
+    { es: "la choza", en: "hut / shack", type: "noun" },
+    { es: "el condominio", en: "condominium", type: "noun" },
+    { es: "el domicilio", en: "residence / address", type: "noun" },
+    
+    // Rooms & Features of a House
+    { es: "la habitación", en: "room / bedroom", type: "noun" },
+    { es: "el cuarto", en: "room", type: "noun" },
+    { es: "la sala", en: "living room", type: "noun" },
+    { es: "el salón", en: "lounge / living room", type: "noun" },
+    { es: "el dormitorio", en: "bedroom", type: "noun" },
+    { es: "la alcoba", en: "bedroom", type: "noun" },
+    { es: "el baño", en: "bathroom", type: "noun" },
+    { es: "el aseo", en: "restroom / half-bath", type: "noun" },
+    { es: "el jardín", en: "garden", type: "noun" },
+    { es: "el patio", en: "yard / patio", type: "noun" },
+    { es: "el balcón", en: "balcony", type: "noun" },
+    { es: "la terraza", en: "terrace", type: "noun" },
+    { es: "el techo", en: "roof / ceiling", type: "noun" },
+    { es: "el tejado", en: "roof", type: "noun" },
+    { es: "la pared", en: "wall (interior)", type: "noun" },
+    { es: "el muro", en: "wall (exterior)", type: "noun" },
+    { es: "el suelo", en: "floor", type: "noun" },
+    { es: "las escaleras", en: "stairs", type: "noun" },
+    { es: "el sótano", en: "basement", type: "noun" },
+    { es: "el ático", en: "attic", type: "noun" },
+    { es: "la chimenea", en: "fireplace / chimney", type: "noun" },
+    { es: "el buzón", en: "mailbox", type: "noun" },
+    { es: "el timbre", en: "doorbell", type: "noun" },
+    { es: "la cerca", en: "fence", type: "noun" },
+    { es: "el portón", en: "gate", type: "noun" },
+    
+    // Housing Logistics & Local Community
+    { es: "la mudanza", en: "move / relocation", type: "noun" },
+    { es: "el alquiler", en: "rent / rental", type: "noun" },
+    { es: "la renta", en: "rent", type: "noun" },
+    { es: "la hipoteca", en: "mortgage", type: "noun" },
+    { es: "el inquilino", en: "tenant", type: "noun" },
+    { es: "el propietario", en: "owner", type: "noun" },
+    { es: "el casero", en: "landlord", type: "noun" },
+    { es: "la aldea", en: "village", type: "noun" },
+    { es: "la villa", en: "town / villa", type: "noun" },
+    { es: "el municipio", en: "municipality", type: "noun" },
+    { es: "la provincia", en: "province", type: "noun" },
+    { es: "la región", en: "region", type: "noun" },
+    { es: "el alcalde", en: "mayor (male)", type: "noun" },
+    { es: "el habitante", en: "inhabitant", type: "noun" },
+    { es: "el residente", en: "resident", type: "noun" },
+    { es: "la asamblea", en: "assembly / meeting", type: "noun" },
+    { es: "el asilo", en: "nursing home / asylum", type: "noun" },
+
+    // --- VERBS: Family Actions, Living & Interactions (50 Verbs) ---
+    { es: "nacer", en: "to be born", type: "verb" },
+    { es: "crecer", en: "to grow", type: "verb" },
+    { es: "criar", en: "to raise (children)", type: "verb" },
+    { es: "cuidar", en: "to care for / to look after", type: "verb" },
+    { es: "amar", en: "to love", type: "verb" },
+    { es: "enamorarse", en: "to fall in love", type: "verb" },
+    { es: "casarse", en: "to get married", type: "verb" },
+    { es: "divorciarse", en: "to get divorced", type: "verb" },
+    { es: "separarse", en: "to separate", type: "verb" },
+    { es: "abrazar", en: "to hug", type: "verb" },
+    { es: "besar", en: "to kiss", type: "verb" },
+    { es: "sonreír", en: "to smile", type: "verb" },
+    { es: "reír", en: "to laugh", type: "verb" },
+    { es: "llorar", en: "to cry", type: "verb" },
+    { es: "gritar", en: "to shout / to yell", type: "verb" },
+    { es: "pelear", en: "to fight / to argue", type: "verb" },
+    { es: "reñir", en: "to scold / to quarrel", type: "verb" },
+    { es: "castigar", en: "to punish", type: "verb" },
+    { es: "perdonar", en: "to forgive", type: "verb" },
+    { es: "disculparse", en: "to apologize", type: "verb" },
+    { es: "ayudar", en: "to help", type: "verb" },
+    { es: "apoyar", en: "to support", type: "verb" },
+    { es: "aconsejar", en: "to advise", type: "verb" },
+    { es: "consolar", en: "to comfort", type: "verb" },
+    { es: "prometer", en: "to promise", type: "verb" },
+    { es: "confiar", en: "to trust", type: "verb" },
+    { es: "engañar", en: "to deceive / to cheat", type: "verb" },
+    { es: "mentir", en: "to lie", type: "verb" },
+    { es: "convivir", en: "to live together / to coexist", type: "verb" },
+    { es: "vivir", en: "to live", type: "verb" },
+    { es: "mudarse", en: "to move (residences)", type: "verb" },
+    { es: "arrendar", en: "to lease / to rent", type: "verb" },
+    { es: "adoptar", en: "to adopt", type: "verb" },
+    { es: "bautizar", en: "to baptize", type: "verb" },
+    { es: "visitar", en: "to visit", type: "verb" },
+    { es: "reunir", en: "to gather / to meet", type: "verb" },
+    { es: "saludar", en: "to greet", type: "verb" },
+    { es: "despedirse", en: "to say goodbye", type: "verb" },
+    { es: "charlar", en: "to chat", type: "verb" },
+    { es: "platicar", en: "to chat (LatAm)", type: "verb" },
+    { es: "jugar", en: "to play", type: "verb" },
+    { es: "regalar", en: "to give a gift", type: "verb" },
+    { es: "fallecer", en: "to pass away", type: "verb" },
+    { es: "morir", en: "to die", type: "verb" },
+    { es: "sobrevivir", en: "to survive", type: "verb" },
+    { es: "mantener", en: "to maintain / to support financially", type: "verb" },
+    { es: "comprometerse", en: "to get engaged / to commit", type: "verb" },
+    { es: "extrañar", en: "to miss (someone/something)", type: "verb" },
+    { es: "echar de menos", en: "to miss (someone/something - Spain)", type: "verb" },
+    { es: "acompañar", en: "to accompany", type: "verb" },
+
+
+       ];
+
+        let currentDeck = [...allVocab];
+        let currentIndex = 0;
+
+        const cardElement = document.getElementById('flashcard');
+        const esWordElement = document.getElementById('es-word');
+        const enWordElement = document.getElementById('en-word');
+        const esTypeElement = document.getElementById('es-type');
+        const enTypeElement = document.getElementById('en-type');
+        const counterElement = document.getElementById('counter');
+
+        function updateCard() {
+            if (currentDeck.length === 0) {
+                esWordElement.textContent = "No cards";
+                enWordElement.textContent = "No cards";
+                esTypeElement.textContent = "";
+                enTypeElement.textContent = "";
+                counterElement.textContent = "0 / 0";
+                return;
+            }
+
+            cardElement.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                const card = currentDeck[currentIndex];
+                esWordElement.textContent = card.es;
+                enWordElement.textContent = card.en;
+                esTypeElement.textContent = card.type;
+                enTypeElement.textContent = card.type;
+                counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            if (currentDeck.length > 0) {
+                cardElement.classList.toggle('is-flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex + 1) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentDeck.length > 0) {
+                currentIndex = (currentIndex - 1 + currentDeck.length) % currentDeck.length;
+                updateCard();
+            }
+        }
+
+        function filterCards() {
+            const filterValue = document.getElementById('typeFilter').value;
+            
+            if (filterValue === 'all') {
+                currentDeck = [...allVocab];
+            } else if (filterValue === 'clean') {
+                // Exclude any type starting with 'profanity-'
+                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
+            } else if (filterValue === 'profanity-only') {
+                // Include only types starting with 'profanity-'
+                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
+            } else {
+                // Filter by specific clean category (noun, verb, phrase)
+                currentDeck = allVocab.filter(word => word.type === filterValue);
+            }
+            
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function shuffleCards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
