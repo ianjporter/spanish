@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Vocabulary Deck</title>
+    <title>Phrases Deck</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -11,7 +11,6 @@
             --accent: #3498db;
             --light: #ecf0f1;
             --white: #ffffff;
-            --warning-accent: #e74c3c;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -121,16 +120,18 @@
 </head>
 <body>
 
-    <h1>Master Vocabulary Deck</h1>
+    <h1>Phrases Deck</h1>
     
     <div class="controls">
         <select id="typeFilter" onchange="filterCards()">
-            <option value="all">All Words (Includes Profanity)</option>
-            <option value="clean">Clean Deck (No Profanity)</option>
-            <option value="profanity-only">Profanity & Slang Only</option>
-            <option value="noun">Nouns Only (Clean)</option>
-            <option value="verb">Verbs Only (Clean)</option>
-            <option value="phrase">Phrases Only (Clean)</option>
+            <option value="all">All Words</option>
+            <option value="noun">Nouns Only</option>
+            <option value="verb">Verbs Only</option>
+            <option value="phrase">Phrases Only</option>
+        </select>
+        <select id="languageToggle" onchange="toggleLanguage()">
+            <option value="es">Spanish First</option>
+            <option value="en">English First</option>
         </select>
         <button onclick="shuffleCards()">Shuffle Deck</button>
     </div>
@@ -138,12 +139,12 @@
     <div class="flashcard-container" onclick="flipCard()">
         <div class="flashcard" id="flashcard">
             <div class="flashcard-face flashcard-front">
-                <div class="word" id="es-word">Cargando...</div>
-                <div class="type-badge" id="es-type">...</div>
+                <div class="word" id="front-word">Cargando...</div>
+                <div class="type-badge" id="front-type">...</div>
             </div>
             <div class="flashcard-face flashcard-back">
-                <div class="word" id="en-word">Loading...</div>
-                <div class="type-badge" id="en-type">...</div>
+                <div class="word" id="back-word">Loading...</div>
+                <div class="type-badge" id="back-type">...</div>
             </div>
         </div>
     </div>
@@ -156,11 +157,8 @@
 
     <script>
         // Vocabulary Database
-        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
-        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        // Tag items with type: "noun", "verb", or "phrase".
         const allVocab = [
-            { es: "el ejemplo", en: "example", type: "noun" },
-
 
 
 // --- PHRASES: Food & Cooking (50 Phrases) ---
@@ -683,28 +681,31 @@
     { es: "estar como una balsa de aceite", en: "to be very calm (lit: to be like a pool of oil)", type: "phrase" },
 
 
-
-
-   
-
-       ];
+         
+        ];
 
         let currentDeck = [...allVocab];
         let currentIndex = 0;
+        let spanishFirst = true;
 
         const cardElement = document.getElementById('flashcard');
-        const esWordElement = document.getElementById('es-word');
-        const enWordElement = document.getElementById('en-word');
-        const esTypeElement = document.getElementById('es-type');
-        const enTypeElement = document.getElementById('en-type');
+        const frontWordElement = document.getElementById('front-word');
+        const backWordElement = document.getElementById('back-word');
+        const frontTypeElement = document.getElementById('front-type');
+        const backTypeElement = document.getElementById('back-type');
         const counterElement = document.getElementById('counter');
+
+        function toggleLanguage() {
+            spanishFirst = document.getElementById('languageToggle').value === 'es';
+            updateCard();
+        }
 
         function updateCard() {
             if (currentDeck.length === 0) {
-                esWordElement.textContent = "No cards";
-                enWordElement.textContent = "No cards";
-                esTypeElement.textContent = "";
-                enTypeElement.textContent = "";
+                frontWordElement.textContent = "No cards";
+                backWordElement.textContent = "No cards";
+                frontTypeElement.textContent = "";
+                backTypeElement.textContent = "";
                 counterElement.textContent = "0 / 0";
                 return;
             }
@@ -713,10 +714,17 @@
             
             setTimeout(() => {
                 const card = currentDeck[currentIndex];
-                esWordElement.textContent = card.es;
-                enWordElement.textContent = card.en;
-                esTypeElement.textContent = card.type;
-                enTypeElement.textContent = card.type;
+                
+                if (spanishFirst) {
+                    frontWordElement.textContent = card.es;
+                    backWordElement.textContent = card.en;
+                } else {
+                    frontWordElement.textContent = card.en;
+                    backWordElement.textContent = card.es;
+                }
+
+                frontTypeElement.textContent = card.type;
+                backTypeElement.textContent = card.type;
                 counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
             }, 150);
         }
@@ -746,14 +754,7 @@
             
             if (filterValue === 'all') {
                 currentDeck = [...allVocab];
-            } else if (filterValue === 'clean') {
-                // Exclude any type starting with 'profanity-'
-                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
-            } else if (filterValue === 'profanity-only') {
-                // Include only types starting with 'profanity-'
-                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
             } else {
-                // Filter by specific clean category (noun, verb, phrase)
                 currentDeck = allVocab.filter(word => word.type === filterValue);
             }
             
