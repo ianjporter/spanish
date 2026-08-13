@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Deck</title>
+    <title>Vocabulary Deck Template</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -11,7 +11,6 @@
             --accent: #3498db;
             --light: #ecf0f1;
             --white: #ffffff;
-            --warning-accent: #e74c3c;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -121,16 +120,14 @@
 </head>
 <body>
 
-    <h1>Health Deck</h1>
+    <h1>Vocabulary Deck Template</h1>
     
     <div class="controls">
         <select id="typeFilter" onchange="filterCards()">
-            <option value="all">All Words (Includes Profanity)</option>
-            <option value="clean">Clean Deck (No Profanity)</option>
-            <option value="profanity-only">Profanity & Slang Only</option>
-            <option value="noun">Nouns Only (Clean)</option>
-            <option value="verb">Verbs Only (Clean)</option>
-            <option value="phrase">Phrases Only (Clean)</option>
+            <option value="all">All Words</option>
+            <option value="noun">Nouns Only</option>
+            <option value="verb">Verbs Only</option>
+            <option value="phrase">Phrases Only</option>
         </select>
         <select id="languageToggle" onchange="toggleLanguage()">
             <option value="es">Spanish First</option>
@@ -160,10 +157,9 @@
 
     <script>
         // Vocabulary Database
+        // Tag items with type: "noun", "verb", or "phrase".
         const allVocab = [
-            { es: "el ejemplo", en: "example", type: "noun" },
-            { es: "tener", en: "to have", type: "verb" },
-            { es: "Me gusta comer el helado", en: "I like to eat ice cream", type: "phrase" },
+       
 
             // NOUNS (Fitness & Gym)
             { es: "la mancuerna", en: "dumbbell", type: "noun" },
@@ -780,7 +776,7 @@
             { es: "estar a base de", en: "to live off / exist on (a type of food)", type: "phrase" },
             { es: "tener la glucosa por las nubes", en: "to have sky-high blood sugar", type: "phrase" },
             { es: "abrir el apetito", en: "to whet the appetite", type: "phrase" }
-        ];
+          ];
 
         let currentDeck = [...allVocab];
         let currentIndex = 0;
@@ -852,14 +848,7 @@
             
             if (filterValue === 'all') {
                 currentDeck = [...allVocab];
-            } else if (filterValue === 'clean') {
-                // Exclude any type starting with 'profanity-'
-                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
-            } else if (filterValue === 'profanity-only') {
-                // Include only types starting with 'profanity-'
-                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
             } else {
-                // Filter by specific clean category (noun, verb, phrase)
                 currentDeck = allVocab.filter(word => word.type === filterValue);
             }
             
