@@ -1,6 +1,6 @@
 # Studying Spanish
 
-## [Master Vocabulary Deck](master-vocab.html)
+
 ## [College Courses and IT vocabulary Deck](college-IT-Spanish.html)
 ## [Advanced Spanish Verbs Deck](advanced-spanish-verbs.html)
 ## [Grocery Shopping Deck](grocery-shopping.html)
@@ -13,3 +13,4 @@
 ## [Health and Nutrition Deck](health.html)
 ## [Culture and Society Deck](culture-society.html)
 ## [School Deck](school.html)
+## [Phrases Deck](phrases.html)
