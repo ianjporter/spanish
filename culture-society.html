@@ -11,7 +11,6 @@
             --accent: #3498db;
             --light: #ecf0f1;
             --white: #ffffff;
-            --warning-accent: #e74c3c;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -125,12 +124,10 @@
     
     <div class="controls">
         <select id="typeFilter" onchange="filterCards()">
-            <option value="all">All Words (Includes Profanity)</option>
-            <option value="clean">Clean Deck (No Profanity)</option>
-            <option value="profanity-only">Profanity & Slang Only</option>
-            <option value="noun">Nouns Only (Clean)</option>
-            <option value="verb">Verbs Only (Clean)</option>
-            <option value="phrase">Phrases Only (Clean)</option>
+            <option value="all">All Words</option>
+            <option value="noun">Nouns Only</option>
+            <option value="verb">Verbs Only</option>
+            <option value="phrase">Phrases Only</option>
         </select>
         <select id="languageToggle" onchange="toggleLanguage()">
             <option value="es">Spanish First</option>
@@ -160,9 +157,9 @@
 
     <script>
         // Vocabulary Database
-        // Paste your arrays below. Tag standard items with type: "noun", "verb", or "phrase".
-        // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
+        // Tag items with type: "noun", "verb", or "phrase".
         const allVocab = [
+            
            // --- NOUNS: Visual Arts & Materials (75 Nouns) ---
     { es: "el arte", en: "art", type: "noun" },
     { es: "la pintura", en: "painting", type: "noun" },
@@ -897,8 +894,7 @@
   { es: "indagar", en: "to inquire / to investigate", type: "verb" },
   { es: "escudriñar", en: "to scrutinize", type: "verb" },
   { es: "visibilizar", en: "to bring visibility to", type: "verb" }
-
-        ];
+  ];
 
         let currentDeck = [...allVocab];
         let currentIndex = 0;
@@ -970,14 +966,7 @@
             
             if (filterValue === 'all') {
                 currentDeck = [...allVocab];
-            } else if (filterValue === 'clean') {
-                // Exclude any type starting with 'profanity-'
-                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
-            } else if (filterValue === 'profanity-only') {
-                // Include only types starting with 'profanity-'
-                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
             } else {
-                // Filter by specific clean category (noun, verb, phrase)
                 currentDeck = allVocab.filter(word => word.type === filterValue);
             }
             
