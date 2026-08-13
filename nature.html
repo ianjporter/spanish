@@ -376,6 +376,7 @@
     { es: "chapotear", en: "to splash", type: "verb" },
     { es: "resbalar", en: "to slip", type: "verb" },
     { es: "orientar", en: "to orient / to guide", type: "verb" }
+             
         ];
 
         let currentDeck = [...allVocab];
@@ -448,14 +449,7 @@
             
             if (filterValue === 'all') {
                 currentDeck = [...allVocab];
-            } else if (filterValue === 'clean') {
-                // Exclude any type starting with 'profanity-'
-                currentDeck = allVocab.filter(word => !word.type.startsWith('profanity-'));
-            } else if (filterValue === 'profanity-only') {
-                // Include only types starting with 'profanity-'
-                currentDeck = allVocab.filter(word => word.type.startsWith('profanity-'));
             } else {
-                // Filter by specific clean category (noun, verb, phrase)
                 currentDeck = allVocab.filter(word => word.type === filterValue);
             }
             
