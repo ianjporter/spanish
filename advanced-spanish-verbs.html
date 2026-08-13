@@ -135,7 +135,7 @@
         }
 
         .card-front {
-            /* Front is English */
+            /* Front default layout */
         }
 
         .card-back {
@@ -207,6 +207,10 @@
             <option value="Inchoatives">Inchoatives (Beginning)</option>
             <option value="Progressives">Progressives (Ongoing)</option>
             <option value="Terminatives">Terminatives (Ending/Result)</option>
+        </select>
+        <select id="languageToggle" onchange="toggleLanguage()">
+            <option value="en">English First</option>
+            <option value="es">Spanish First</option>
         </select>
         <button onclick="shuffleCards()">Shuffle</button>
     </div>
@@ -290,6 +294,7 @@
         let allCards = [];
         let currentDeck = [];
         let currentIndex = 0;
+        let spanishFirst = false;
 
         // Generate Cards
         function generateCards() {
@@ -311,18 +316,33 @@
             shuffleCards(); // Initial shuffle
         }
 
+        function toggleLanguage() {
+            spanishFirst = document.getElementById("languageToggle").value === "es";
+            updateDisplay();
+        }
+
         function updateDisplay() {
             if (currentDeck.length === 0) return;
             
             const card = currentDeck[currentIndex];
             
-            document.getElementById("front-phrase").textContent = card.en;
-            document.getElementById("front-category").textContent = card.cat;
-            document.getElementById("front-base").textContent = `Base: to ${card.base_en}`;
-            
-            document.getElementById("back-phrase").textContent = card.sp;
-            document.getElementById("back-category").textContent = card.cat;
-            document.getElementById("back-base").textContent = `Base: ${card.base_sp}`;
+            if (spanishFirst) {
+                document.getElementById("front-phrase").textContent = card.sp;
+                document.getElementById("front-category").textContent = card.cat;
+                document.getElementById("front-base").textContent = `Base: ${card.base_sp}`;
+                
+                document.getElementById("back-phrase").textContent = card.en;
+                document.getElementById("back-category").textContent = card.cat;
+                document.getElementById("back-base").textContent = `Base: to ${card.base_en}`;
+            } else {
+                document.getElementById("front-phrase").textContent = card.en;
+                document.getElementById("front-category").textContent = card.cat;
+                document.getElementById("front-base").textContent = `Base: to ${card.base_en}`;
+                
+                document.getElementById("back-phrase").textContent = card.sp;
+                document.getElementById("back-category").textContent = card.cat;
+                document.getElementById("back-base").textContent = `Base: ${card.base_sp}`;
+            }
             
             document.getElementById("counter").textContent = `Card ${currentIndex + 1} of ${currentDeck.length}`;
             
