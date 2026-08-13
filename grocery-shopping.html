@@ -124,7 +124,17 @@
     <h1>Grocery Shopping Vocabulary Deck</h1>
     
     <div class="controls">
-            
+        <select id="typeFilter" onchange="filterCards()">
+            <option value="all">All Words (Includes Profanity)</option>
+            <option value="clean">Clean Deck (No Profanity)</option>
+            <option value="profanity-only">Profanity & Slang Only</option>
+            <option value="noun">Nouns Only (Clean)</option>
+            <option value="verb">Verbs Only (Clean)</option>
+            <option value="phrase">Phrases Only (Clean)</option>
+        </select>
+        <select id="languageToggle" onchange="toggleLanguage()">
+            <option value="es">Spanish First</option>
+            <option value="en">English First</option>
         </select>
         <button onclick="shuffleCards()">Shuffle Deck</button>
     </div>
@@ -132,12 +142,12 @@
     <div class="flashcard-container" onclick="flipCard()">
         <div class="flashcard" id="flashcard">
             <div class="flashcard-face flashcard-front">
-                <div class="word" id="es-word">Cargando...</div>
-                <div class="type-badge" id="es-type">...</div>
+                <div class="word" id="front-word">Cargando...</div>
+                <div class="type-badge" id="front-type">...</div>
             </div>
             <div class="flashcard-face flashcard-back">
-                <div class="word" id="en-word">Loading...</div>
-                <div class="type-badge" id="en-type">...</div>
+                <div class="word" id="back-word">Loading...</div>
+                <div class="type-badge" id="back-type">...</div>
             </div>
         </div>
     </div>
@@ -154,7 +164,33 @@
         // Tag profanities with type: "profanity-noun", "profanity-verb", or "profanity-phrase".
         const allVocab = [
 
-// --- NOUNS: The Supermarket & Shopping (150 Nouns) --- // General Store Terms { es: "el supermercado", en: "supermarket", type: "noun" }, { es: "el mercado", en: "market", type: "noun" }, { es: "la tienda", en: "store / shop", type: "noun" }, { es: "el carrito", en: "shopping cart", type: "noun" }, { es: "la canasta", en: "shopping basket", type: "noun" }, { es: "el pasillo", en: "aisle", type: "noun" }, { es: "el estante", en: "shelf", type: "noun" }, { es: "la caja", en: "cash register / checkout", type: "noun" }, { es: "el cajero", en: "cashier (male)", type: "noun" }, { es: "la cajera", en: "cashier (female)", type: "noun" }, { es: "el recibo", en: "receipt", type: "noun" }, { es: "la factura", en: "invoice / bill", type: "noun" }, { es: "la bolsa", en: "bag", type: "noun" }, { es: "el código de barras", en: "barcode", type: "noun" }, { es: "el precio", en: "price", type: "noun" }, { es: "la oferta", en: "sale / offer", type: "noun" }, { es: "el descuento", en: "discount", type: "noun" }, { es: "la sección", en: "section / department", type: "noun" }, { es: "la báscula", en: "scale (for weighing)", type: "noun" }, { es: "el cliente", en: "customer", type: "noun" }, { es: "la fila", en: "line (queue)", type: "noun" }, { es: "el producto", en: "product", type: "noun" }, { es: "la marca", en: "brand", type: "noun" }, { es: "el envase", en: "container / packaging", type: "noun" }, { es: "el paquete", en: "package", type: "noun" },
+// --- NOUNS: The Supermarket & Shopping (150 Nouns) --- 
+// General Store Terms 
+{ es: "el supermercado", en: "supermarket", type: "noun" }, 
+{ es: "el mercado", en: "market", type: "noun" }, 
+{ es: "la tienda", en: "store / shop", type: "noun" }, 
+{ es: "el carrito", en: "shopping cart", type: "noun" }, 
+{ es: "la canasta", en: "shopping basket", type: "noun" }, 
+{ es: "el pasillo", en: "aisle", type: "noun" }, 
+{ es: "el estante", en: "shelf", type: "noun" }, 
+{ es: "la caja", en: "cash register / checkout", type: "noun" }, 
+{ es: "el cajero", en: "cashier (male)", type: "noun" }, 
+{ es: "la cajera", en: "cashier (female)", type: "noun" }, 
+{ es: "el recibo", en: "receipt", type: "noun" }, 
+{ es: "la factura", en: "invoice / bill", type: "noun" }, 
+{ es: "la bolsa", en: "bag", type: "noun" }, 
+{ es: "el código de barras", en: "barcode", type: "noun" }, 
+{ es: "el precio", en: "price", type: "noun" }, 
+{ es: "la oferta", en: "sale / offer", type: "noun" }, 
+{ es: "el descuento", en: "discount", type: "noun" }, 
+{ es: "la sección", en: "section / department", type: "noun" }, 
+{ es: "la báscula", en: "scale (for weighing)", type: "noun" }, 
+{ es: "el cliente", en: "customer", type: "noun" }, 
+{ es: "la fila", en: "line (queue)", type: "noun" }, 
+{ es: "el producto", en: "product", type: "noun" }, 
+{ es: "la marca", en: "brand", type: "noun" }, 
+{ es: "el envase", en: "container / packaging", type: "noun" }, 
+{ es: "el paquete", en: "package", type: "noun" },
 
 // Fruits (Frutas)
 { es: "la manzana", en: "apple", type: "noun" },
@@ -349,24 +385,30 @@
 { es: "abrir", en: "to open", type: "verb" },
 { es: "cerrar", en: "to close", type: "verb" },
 
-  ];
+        ];
 
         let currentDeck = [...allVocab];
         let currentIndex = 0;
+        let spanishFirst = true;
 
         const cardElement = document.getElementById('flashcard');
-        const esWordElement = document.getElementById('es-word');
-        const enWordElement = document.getElementById('en-word');
-        const esTypeElement = document.getElementById('es-type');
-        const enTypeElement = document.getElementById('en-type');
+        const frontWordElement = document.getElementById('front-word');
+        const backWordElement = document.getElementById('back-word');
+        const frontTypeElement = document.getElementById('front-type');
+        const backTypeElement = document.getElementById('back-type');
         const counterElement = document.getElementById('counter');
+
+        function toggleLanguage() {
+            spanishFirst = document.getElementById('languageToggle').value === 'es';
+            updateCard();
+        }
 
         function updateCard() {
             if (currentDeck.length === 0) {
-                esWordElement.textContent = "No cards";
-                enWordElement.textContent = "No cards";
-                esTypeElement.textContent = "";
-                enTypeElement.textContent = "";
+                frontWordElement.textContent = "No cards";
+                backWordElement.textContent = "No cards";
+                frontTypeElement.textContent = "";
+                backTypeElement.textContent = "";
                 counterElement.textContent = "0 / 0";
                 return;
             }
@@ -375,10 +417,17 @@
             
             setTimeout(() => {
                 const card = currentDeck[currentIndex];
-                esWordElement.textContent = card.es;
-                enWordElement.textContent = card.en;
-                esTypeElement.textContent = card.type;
-                enTypeElement.textContent = card.type;
+                
+                if (spanishFirst) {
+                    frontWordElement.textContent = card.es;
+                    backWordElement.textContent = card.en;
+                } else {
+                    frontWordElement.textContent = card.en;
+                    backWordElement.textContent = card.es;
+                }
+
+                frontTypeElement.textContent = card.type;
+                backTypeElement.textContent = card.type;
                 counterElement.textContent = `${currentIndex + 1} / ${currentDeck.length}`;
             }, 150);
         }
