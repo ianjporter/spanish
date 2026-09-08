@@ -1,6 +1,6 @@
 # Studying Spanish
 
-
+## [1000s Common Words List](common-words.html)
 ## [College Courses and IT vocabulary Deck](college-IT-Spanish.html)
 ## [Advanced Spanish Verbs Deck](advanced-spanish-verbs.html)
 ## [Grocery Shopping Deck](grocery-shopping.html)
